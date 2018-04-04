@@ -5,6 +5,8 @@
 
 var q = require('q');
 var test = require("./modules/test/test");
+var sellrecognizer = require("./modules/sellrecognizer/sellrecognizer");
+
 var _ = require('underscore');
 module.exports =
 {

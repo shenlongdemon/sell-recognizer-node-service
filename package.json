@@ -16,6 +16,7 @@
     "compression": "^1.7.1",
     "express": "4.15.2",
     "firebase-admin": "^5.4.3",
+    "googleapis": "^28.0.1",
     "lz-string": "^1.4.4",
     "node-json-db": "^0.7.3",
     "q": "^1.4.1",
