@@ -1,29 +1,26 @@
 var q = require('q');
 var sellrepo = require("../repo/mongodb");
-var insertItem = function(item){    	
-	MongoClient.connect(url, function (err, db) {
-        if (err) {
-          console.log('Unable to connect to the mongoDB server. Error:', err);
-        } else {
-          //HURRAY!! We are connected. :)
-          console.log('Connection established to', url);      
-          // Get the documents collection
-          var collection = db.collection('Items');                      
-          // Insert some users
-          collection.insert([item], function (err, result) {
-            if (err) {
-              console.log(err);
-            } else {
-              console.log('Inserted %d documents into the "users" collection. The documents inserted with "_id" are:', result.length, result);
-            }
-            //Close connection
-            db.close();
-          });
-        }
-      });
+var uuid = require("uuid");
 
+var insertItem = function(item){    	
+    if (item.id === undefined){   
+        item.id =  uuid.v4();    
+    }
+    return sellrepo.insertItem(item);
+};
+var getItemById = function(id){    	   
+    return sellrepo.getItemById(id);
+};
+var getItemsByOwnerId = function(ownerId, pageNum, pageSize){    	   
+    return sellrepo.getItemsByOwnerId(ownerId, pageNum, pageSize);
+};
+var getItemBySellSectionId = function(sellSectionId){    	   
+    return sellrepo.getItemBySellSectionId(sellSectionId);
 };
 module.exports =
 {	
-	insertItem: insertItem
+    insertItem: insertItem,
+    getItemById: getItemById,
+    getItemsByOwnerId: getItemsByOwnerId,
+    getItemBySellSectionId: getItemBySellSectionId
 }

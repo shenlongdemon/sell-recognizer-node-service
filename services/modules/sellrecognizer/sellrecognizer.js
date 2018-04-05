@@ -5,52 +5,107 @@
 
 var q = require('q');
 var _ = require('underscore');
-const {google} = require('googleapis');
-const urlshortener = google.urlshortener('v1');
-const customsearch = google.customsearch('v1');
+var sellService = require("./service/sellservice");
+var searchImageService = require("./service/serchimageservice");
 
-const OAuth2 = google.auth.OAuth2;
-const oauth2Client = new OAuth2(
-	"489466368875-fp3lpk5td3t1s8ht1js8su4rravkgahb.apps.googleusercontent.com",
-	"YHby2O65h-zTwmp4gAFp9Sx8",
-	["urn:ietf:wg:oauth:2.0:oob","http://localhost"]
-  );
-google.options({
-	auth: oauth2Client
-});
-const searchOptions = {    
-    apiKey: "AIzaSyCIFpX02yxf_azs1qwmn2feMDYUfQLqZDQ",
-    cx: "004370175914457095242:a4ftrdtwhm4"
-  };
+
 var searchImage = function(obj){
-	console.log("begin searchImage " + obj);
+	console.log("begin sellrecognizer controller searchImage " + obj);
 	var deferred = q.defer();	
 
-	var options = _.clone(searchOptions);
-	options.q = obj;
-
-	customsearch.cse.list({
-		cx: options.cx,
-		q: options.q,
-		searchType:"image",
-		auth: options.apiKey
-		}).then(function(json){
-			console.log("got searchImage");
-			var items = _.map(json.data.items, function(item){ 
-				return {link:item.link, title: item.title};
-			});
-			var res = {
-				Data : items,
+	searchImageService.searchImage(obj)
+		.then(function(res){
+			console.log("sellrecognizer controller searchImage " + res);
+			var res =  {
+				Data : res,
 				Message: "",
 				Status: 1
 			};
-			deferred.resolve(res);	
-		});
-    return deferred.promise;
+			deferred.resolve(res);
+		}		
+	);	
+	return deferred.promise;
 };
-
+var insertItem = function(item){
+	console.log("begin sellrecognizer controller insertItem " + item);
+	var deferred = q.defer();		
+	sellService.insertItem(item)
+		.then(function(res){
+			console.log("sellrecognizer controller insertItem " + res);
+			var res =  {
+				Data : res,
+				Message: "",
+				Status: 1
+			};
+			deferred.resolve(res);
+		}		
+	);
+	
+	return deferred.promise;
+};
+var getItemById = function(id){
+	console.log("begin sellrecognizer controller getItemById " + id);
+	var deferred = q.defer();		
+	
+	sellService.getItemById(id)
+		.then(function(res){
+			console.log("sellrecognizer controller getItemById " + res);
+			var res =  {
+				Data : res,
+				Message: "",
+				Status: 1
+			};
+			deferred.resolve(res);
+		}		
+	);
+	
+	return deferred.promise;
+};
+var getItemsByOwnerId = function(ownerId, pageNum, pageSize){
+	console.log("begin sellrecognizer controller getItemsByOwnerId " + ownerId);
+	var deferred = q.defer();	
+	var num = parseInt(pageNum);
+	num = num < 1 ? num = 1 : num = num;
+	var size = parseInt(pageSize);
+	size = size < 1 ? size = 10 : size = size;
+	
+	sellService.getItemsByOwnerId(ownerId, num, size)
+		.then(function(res){
+			console.log("sellrecognizer controller getItemsByOwnerId " + res);
+			var res =  {
+				Data : res,
+				Message: "",
+				Status: 1
+			};
+			deferred.resolve(res);
+		}		
+	);
+	
+	return deferred.promise;
+};
+var getItemBySellSectionId = function(sellSectionId){
+	console.log("begin sellrecognizer controller getItemBySellSectionId " + sellSectionId);
+	var deferred = q.defer();		
+	
+	sellService.getItemBySellSectionId(sellSectionId)
+		.then(function(res){
+			console.log("sellrecognizer controller getItemBySellSectionId " + res);
+			var res =  {
+				Data : res,
+				Message: "",
+				Status: 1
+			};
+			deferred.resolve(res);
+		}		
+	);
+	
+	return deferred.promise;
+};
 module.exports =
-{	
+{
 	searchImage : searchImage,
-	insertItem: insertItem
+	insertItem: insertItem,
+	getItemById: getItemById,
+    getItemsByOwnerId: getItemsByOwnerId,
+    getItemBySellSectionId: getItemBySellSectionId
 }
