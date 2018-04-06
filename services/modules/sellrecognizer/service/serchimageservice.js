@@ -1,6 +1,7 @@
 
 var q = require('q');
 var _ = require('underscore');
+var uuid = require("uuid");
 
 const {google} = require('googleapis');
 const urlshortener = google.urlshortener('v1');
@@ -33,8 +34,8 @@ var searchImage = function(obj){
 		auth: options.apiKey
 		}).then(function(json){
 			console.log("sellrecognizer got searchImage");
-			var items = _.map(json.data.items, function(item){ 
-				return {link:item.link, title: item.title};
+			var items = _.map(json.data.items, function(item, index){ 
+				return {link:item.link, title: item.title, index: index, id: uuid.v4()};
 			});
 			
 			console.log("sellrecognizer searchImage res = " + JSON.stringify(items));
