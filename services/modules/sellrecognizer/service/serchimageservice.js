@@ -32,16 +32,13 @@ var searchImage = function(obj){
 		searchType:"image",
 		auth: options.apiKey
 		}).then(function(json){
-			console.log("sellrecognizer controller got searchImage");
+			console.log("sellrecognizer got searchImage");
 			var items = _.map(json.data.items, function(item){ 
 				return {link:item.link, title: item.title};
 			});
-			var res = {
-				Data : items,
-				Message: "",
-				Status: 1
-			};
-			deferred.resolve(res);	
+			
+			console.log("sellrecognizer searchImage res = " + JSON.stringify(items));
+			deferred.resolve(items);	
 		});
     return deferred.promise;
 };
