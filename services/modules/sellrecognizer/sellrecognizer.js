@@ -9,103 +9,122 @@ var sellService = require("./service/sellservice");
 var searchImageService = require("./service/serchimageservice");
 
 
-var searchImage = function(obj){
+var searchImage = function (obj) {
 	console.log("begin sellrecognizer controller searchImage " + obj);
-	var deferred = q.defer();	
+	var deferred = q.defer();
 
 	searchImageService.searchImage(obj)
-		.then(function(res){
+		.then(function (res) {
 			console.log("sellrecognizer controller searchImage " + res);
-			var res =  {
-				Data : res,
+			var res = {
+				Data: res,
 				Message: "",
 				Status: 1
 			};
 			deferred.resolve(res);
-		}		
-	);	
+		}
+		);
 	return deferred.promise;
 };
-var insertItem = function(item){
+var insertItem = function (item) {
 	console.log("begin sellrecognizer controller insertItem " + item);
-	var deferred = q.defer();		
+	var deferred = q.defer();
 	sellService.insertItem(item)
-		.then(function(res){
+		.then(function (res) {
 			console.log("sellrecognizer controller insertItem " + res);
-			var res =  {
-				Data : res,
+			var res = {
+				Data: res,
 				Message: "",
 				Status: 1
 			};
 			deferred.resolve(res);
-		}		
-	);
-	
+		}
+		);
+
 	return deferred.promise;
 };
-var getItemById = function(id){
+var getItemById = function (id) {
 	console.log("begin sellrecognizer controller getItemById " + id);
-	var deferred = q.defer();		
-	
+	var deferred = q.defer();
+
 	sellService.getItemById(id)
-		.then(function(res){
+		.then(function (res) {
 			console.log("sellrecognizer controller getItemById " + res);
-			var res =  {
-				Data : res,
+			var res = {
+				Data: res,
 				Message: "",
 				Status: 1
 			};
 			deferred.resolve(res);
-		}		
-	);
-	
+		}
+		);
+
 	return deferred.promise;
 };
-var getItemsByOwnerId = function(ownerId, pageNum, pageSize){
+var getItemsByOwnerId = function (ownerId, pageNum, pageSize) {
 	console.log("begin sellrecognizer controller getItemsByOwnerId " + ownerId);
-	var deferred = q.defer();	
+	var deferred = q.defer();
 	var num = parseInt(pageNum);
 	num = num < 1 ? num = 1 : num = num;
 	var size = parseInt(pageSize);
 	size = size < 1 ? size = 10 : size = size;
-	
+
 	sellService.getItemsByOwnerId(ownerId, num, size)
-		.then(function(res){
+		.then(function (res) {
 			console.log("sellrecognizer controller getItemsByOwnerId " + res);
-			var res =  {
-				Data : res,
+			var res = {
+				Data: res,
 				Message: "",
 				Status: 1
 			};
 			deferred.resolve(res);
-		}		
-	);
-	
+		}
+		);
+
 	return deferred.promise;
 };
-var getItemBySellSectionId = function(sellSectionId){
+var getItemBySellSectionId = function (sellSectionId) {
 	console.log("begin sellrecognizer controller getItemBySellSectionId " + sellSectionId);
-	var deferred = q.defer();		
-	
+	var deferred = q.defer();
+
 	sellService.getItemBySellSectionId(sellSectionId)
-		.then(function(res){
+		.then(function (res) {
 			console.log("sellrecognizer controller getItemBySellSectionId " + res);
-			var res =  {
-				Data : res,
+			var res = {
+				Data: res,
 				Message: "",
 				Status: 1
 			};
 			deferred.resolve(res);
-		}		
-	);
-	
+		}
+		);
+
+	return deferred.promise;
+};
+var getCategories = function () {
+	console.log("begin sellrecognizer controller getCategories ");
+	var deferred = q.defer();
+
+	sellService.getCategories()
+		.then(function (res) {
+			console.log("sellrecognizer controller getCategories " + res);
+			var res = {
+				Data: res,
+				Message: "",
+				Status: 1
+			};
+			deferred.resolve(res);
+		}
+		);
+
 	return deferred.promise;
 };
 module.exports =
-{
-	searchImage : searchImage,
-	insertItem: insertItem,
-	getItemById: getItemById,
-    getItemsByOwnerId: getItemsByOwnerId,
-    getItemBySellSectionId: getItemBySellSectionId
-}
+	{
+		searchImage: searchImage,
+		insertItem: insertItem,
+		getItemById: getItemById,
+		getItemsByOwnerId: getItemsByOwnerId,
+		getItemBySellSectionId: getItemBySellSectionId,
+		getCategories: getCategories
+	}
