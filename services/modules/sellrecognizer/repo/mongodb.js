@@ -101,11 +101,25 @@ var getCategories = function () {
   var query = {};
   return getBy(dbConfig.collections.categories, query, 1, 0);
 };
+var updateAllOwnerCode = function (OMID_CODE) {
+  openConnect().then(function (database) {
+    // Insert some users
+    try {
+      var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.items);
+      collection.updateMany({},
+        { $set: { "owner.sectionCode": owner.code + " " + OMID_CODE } })
+    } catch (e) {
+      console.log("updateAllOwnerCode error " + JSON.stringify(e));
+    }
+
+  });
+}
 module.exports =
   {
     insertItem: insertItem,
     getItemById: getItemById,
     getItemsByOwnerId: getItemsByOwnerId,
     getItemBySellSectionId: getItemBySellSectionId,
-    getCategories: getCategories
+    getCategories: getCategories,
+    updateAllOwnerCode: updateAllOwnerCode
   }

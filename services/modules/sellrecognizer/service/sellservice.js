@@ -14,7 +14,6 @@ function convertToNum(string) {
                 var idx = STR.indexOf(c);
                 if (idx > -1) {
                     code += index + "" + idx;
-                    //console.log(c + " : " + index + "" + idx);
                 }
             });
         } catch (e) {
@@ -39,22 +38,28 @@ function convertToString(string) {
     return code;
 }
 function getMAXString(string) {
+    try{    
     var str = string.length > MAX_DIGIT ? string.substr(0, MAX_DIGIT - 1) : string;
     return str;
+    }catch(e){
+        console.log("getMAXString Error " + e);
+        return "";
+    }
 }
+
 //Dead Kjhkhjk
-function genOwnerCode(itemCode, item) {
-    var firstName = getMAXString(item.owner.firstName);
-    var lastName = getMAXString(item.owner.lastName);
-    var state = getMAXString(item.owner.state);
-    var country = getMAXString(item.owner.country);
-    var zipCode = getMAXString(item.owner.zipCode);
+function genPersonalCode(owner) {
+    var firstName = getMAXString(owner.firstName);
+    var lastName = getMAXString(owner.lastName);
+    var state = getMAXString(owner.state);
+    var country = getMAXString(owner.country);
+    var zipCode = getMAXString(owner.zipCode);
 
     var allStr = " " + firstName + " " + lastName + " " + state + " " + zipCode + " " + country
-        + "[" + item.owner.position.coords.latitude + "," + item.owner.position.coords.longitude + " " + item.owner.position.coords.altitude + "] "
-        + item.owner.weather.main.temp + "C";
-    var code = itemCode + convertToNum(allStr);
-    console.log("genOwnerCode " + code);
+        + "[" + owner.position.coords.latitude + "," + owner.position.coords.longitude + " " + owner.position.coords.altitude + "] "
+        + owner.weather.main.temp + "C";
+    var code = convertToNum(allStr);
+    console.log("genPersonalCode " + code);
     return code;
 
 }
@@ -68,11 +73,14 @@ function genItemCode(item) {
     return code;
 
 }
-
+function autoUpdateAllOwnerCode(info) {
+    var code = genPersonalCode(info)
+    sellrepo.updateAllOwnerCode(OMID_CODE);
+}
 var insertItem = function (item) {
     item.id = uuid.v4();
     var itemCode = genItemCode(item);
-    var ownerCode = genOwnerCode(itemCode, item)
+    var ownerCode = itemCode + genPersonalCode(item.owner)
     item.code = itemCode;
     item.shortCode = LZString.compress(itemCode);
     item.owner.code = ownerCode;
@@ -95,8 +103,7 @@ var getCategories = function () {
     return sellrepo.getCategories();
 };
 var updateOMIDCODE = function (info) {
-    var allStr = "";
-    OMID_CODE = convertToNum(allStr);
+    OMID_CODE = genPersonalCode(info);
     return OMID_CODE;
 }
 module.exports =
