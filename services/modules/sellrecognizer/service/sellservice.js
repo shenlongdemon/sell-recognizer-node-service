@@ -82,12 +82,9 @@ var insertItem = function (item) {
     var itemCode = genItemCode(item);
     var ownerCode = itemCode + genPersonalCode(item.owner)
     item.code = itemCode;
-    item.shortCode = LZString.compress(itemCode);
     item.owner.code = ownerCode;
-    item.owner.shortCode = LZString.compress(ownerCode);
 
     console.log("owner code " + ownerCode + " for " + convertToString(ownerCode));
-    console.log("ownershortCode " + item.owner.shortCode + " itemshortcode " + item.shortCode);
     return sellrepo.insertItem(item);
 };
 var getItemById = function (id) {
