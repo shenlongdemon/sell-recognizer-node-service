@@ -4,7 +4,8 @@ var config = {
     dbname: "SellRecognizer",
     collections: {
         categories: "Categories",
-        items: "Items"
+        items: "Items",
+        users: "Users"
     }
 };
 module.exports = config;

@@ -6,7 +6,8 @@ express 	   = require("express"),
 bodyParser   = require("body-parser"),      
 env          = process.env,
 controller   = require("./controllers/controller"),
-mongodb      =  require("./services/modules/sellrecognizer/repo/mongodb")
+mongodb      = require("./services/modules/sellrecognizer/repo/mongodb"),
+schedule     = require("./schedule/schedule")
 ;
 var app = express();
 
@@ -33,4 +34,6 @@ app.post("/api/:service/:action", controller.dopost);
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
-mongodb.updateAllOwnerCode("OMID___xxx___CODE");
+schedule.start();
+
+

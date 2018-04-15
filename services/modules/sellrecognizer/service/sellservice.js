@@ -4,7 +4,6 @@ var uuid = require("uuid");
 let STRS = ["0123456789", "abcdefghij", "klmnopqrs", "tuvwxyz", "ABCDEFGHIJ", "KLMNOPQRS", "TUVWXYZ", "-/ _+'.,;:", "[]{}"];
 var _ = require('underscore');
 var LZString = require('lz-string');
-var OMID_CODE = "";
 var MAX_DIGIT = 8;
 function convertToNum(string) {
     var code = "";
@@ -38,17 +37,17 @@ function convertToString(string) {
     return code;
 }
 function getMAXString(string) {
-    try{    
-    var str = string.length > MAX_DIGIT ? string.substr(0, MAX_DIGIT - 1) : string;
-    return str;
-    }catch(e){
+    try {
+        var str = string.length > MAX_DIGIT ? string.substr(0, MAX_DIGIT - 1) : string;
+        return str;
+    } catch (e) {
         console.log("getMAXString Error " + e);
         return "";
     }
 }
 
 //Dead Kjhkhjk
-function genPersonalCode(owner) {
+function genInfoCode(owner) {
     var firstName = getMAXString(owner.firstName);
     var lastName = getMAXString(owner.lastName);
     var state = getMAXString(owner.state);
@@ -74,24 +73,57 @@ function genItemCode(item) {
 
 }
 function autoUpdateAllOwnerCode(info) {
-    var code = genPersonalCode(info)
+    var code = genInfoCode(info)
     sellrepo.updateAllOwnerCode(OMID_CODE);
 }
+
+var updateOMIDCODE = function (info) {
+    var OMID_CODE = genInfoCode(info);
+    this.updateAllOwnerCode(OMID_CODE);
+    return OMID_CODE;
+};
+var updateAllOwnerCode = function (OMID_CODE) {
+    return sellrepo.updateAllOwnerCode(OMID_CODE);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 var insertItem = function (item) {
     item.id = uuid.v4();
     var itemCode = genItemCode(item);
-    var ownerCode = itemCode + genPersonalCode(item.owner)
+    var ownerCode = itemCode + genInfoCode(item.owner)
     item.code = itemCode;
     item.owner.code = ownerCode;
-
+    item.section = { active: true, code: "", history:[] };
+    item.buyerCode = "";
     console.log("owner code " + ownerCode + " for " + convertToString(ownerCode));
     return sellrepo.insertItem(item);
 };
+
 var getItemById = function (id) {
     return sellrepo.getItemById(id);
 };
 var getItemsByOwnerId = function (ownerId, pageNum, pageSize) {
     return sellrepo.getItemsByOwnerId(ownerId, pageNum, pageSize);
+};
+var getItems = function (pageNum, pageSize) {
+    return sellrepo.getItems(pageNum, pageSize);
 };
 var getItemBySellSectionId = function (sellSectionId) {
     return sellrepo.getItemBySellSectionId(sellSectionId);
@@ -99,9 +131,21 @@ var getItemBySellSectionId = function (sellSectionId) {
 var getCategories = function () {
     return sellrepo.getCategories();
 };
-var updateOMIDCODE = function (info) {
-    OMID_CODE = genPersonalCode(info);
-    return OMID_CODE;
+
+var payment = function (itemId, buyerInfo) {
+    var buyerCode = genInfoCode(buyerInfo);
+    buyerInfo.code = buyerCode;
+    return sellrepo.getItemById(itemId).then(function (item) {
+
+        item.section.history = item.section.history || [];
+        item.section.history.push(item.owner);
+        item.owner = buyerInfo;
+        item.buyerCode = item.code + buyerCode;
+        return sellrepo.updateItem(item);
+    });
+}
+var login = function (phone, password) {
+    return sellrepo.login(phone, password);
 }
 module.exports =
     {
@@ -110,5 +154,10 @@ module.exports =
         getItemsByOwnerId: getItemsByOwnerId,
         getItemBySellSectionId: getItemBySellSectionId,
         getCategories: getCategories,
-        updateOMIDCODE: updateOMIDCODE
+        updateOMIDCODE: updateOMIDCODE,
+        updateAllOwnerCode: updateAllOwnerCode,
+        payment: payment,
+        login: login,
+        getItems: getItems
+
     }

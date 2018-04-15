@@ -89,10 +89,15 @@ var getItemById = function (id) {
 
 var getItemsByOwnerId = function (ownerId, pageNum, pageSize) {
     console.log('begin repo getItemsByOwnerId ', ownerId);
-    var query = { ownerId: ownerId };
+    var query = { "owner.id": ownerId };
     return getItemsBy(query, pageNum, pageSize);
 };
 
+var getItems = function ( pageNum, pageSize) {
+    console.log('begin repo getItems');
+    var query = {};
+    return getItemsBy(query, pageNum, pageSize);
+};
 var getItemBySellSectionId = function (sellSectionId) {
     var query = { "sellSections.id": sellSectionId };
     return getItemsBy(query, 1, 1);
@@ -106,19 +111,80 @@ var updateAllOwnerCode = function (OMID_CODE) {
         // Insert some users
         try {
             var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.items);
-            collection.find({$or:[{"section.active":undefined},{"section.active":false}]})
-            .forEach(function(item) { 
-                item.section = item.section || {};
-                item.section.code = item.owner.code + OMID_CODE
-                item.section.active = true;
-                collection.save(item);
-            });
+            collection.find({ $or: [{ section: undefined }, { "section.active": undefined }, { "section.active": true }] })
+                .forEach(function (item) {
+                    item.section = item.section || {};
+                    item.section.code = item.owner.code + OMID_CODE
+                    item.section.active = true;
+                    collection.save(item);
+                    console.log("updateAllOwnerCode update " + JSON.stringify(item));
+                });
         } catch (e) {
             console.log("updateAllOwnerCode error " + JSON.stringify(e));
         }
 
     });
 }
+var getByItemId = function (id) {
+    openConnect().then(function (database) {
+        try {
+            var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.items);
+            collection.find({ $or: [{ section: undefined }, { "section.active": undefined }, { "section.active": true }] })
+                .forEach(function (item) {
+
+                    item.section = item.section || {};
+                    item.section.code = item.owner.code + OMID_CODE
+                    item.section.active = true;
+                    collection.save(item);
+                    console.log("updateAllOwnerCode update " + JSON.stringify(item));
+
+                });
+        } catch (e) {
+            console.log("updateAllOwnerCode error " + JSON.stringify(e));
+        }
+
+    });
+};
+var updateItem = function (itemToUpdate) {
+    openConnect().then(function (database) {
+        // Insert some users
+        var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.items);
+
+        collection.findOne({ id: itemToUpdate.id }).then(function (item, err) {
+            if (err) {
+                console.log("repo updateItem error when findOne " + err);
+                deferred.reject(err);
+            } else {
+                console.log('repo getItems are: ', item);
+                Object.assign(item, itemToUpdate);
+                var result = collection.save(item);
+                deferred.resolve(result);
+
+            }
+            //Close connection
+            database.close(true);
+
+        });
+
+    });
+}
+var login = function (phone, password) {
+    console.log('begin repo login ' + phone + " " + password); 
+    var deferred = q.defer();
+    openConnect().then(function (database) {
+        var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.users);
+        collection.findOne({ $and: [{ phone: phone }, { password: password }] }).then(function (item, err) {
+            if (err) {
+                console.log("repo updateItem error when findOne " + err);
+                deferred.reject(err);
+            } else {
+                deferred.resolve(item);
+            }
+            database.close(true);
+        });
+    });
+    return deferred.promise;
+};
 module.exports =
     {
         insertItem: insertItem,
@@ -126,5 +192,8 @@ module.exports =
         getItemsByOwnerId: getItemsByOwnerId,
         getItemBySellSectionId: getItemBySellSectionId,
         getCategories: getCategories,
-        updateAllOwnerCode: updateAllOwnerCode
+        updateAllOwnerCode: updateAllOwnerCode,
+        updateItem: updateItem,
+        login: login,
+        getItems:getItems
     }
