@@ -5,6 +5,8 @@ let STRS = ["0123456789", "abcdefghij", "klmnopqrs", "tuvwxyz", "ABCDEFGHIJ", "K
 var _ = require('underscore');
 var LZString = require('lz-string');
 var MAX_DIGIT = 8;
+var encoder = require('int-encoder')
+
 function convertToNum(string) {
     var code = "";
     Array.from(string).map((c, key) => {
@@ -48,6 +50,7 @@ function getMAXString(string) {
 
 //Dead Kjhkhjk
 function genInfoCode(owner) {
+    console.log("sellservice genInfoCode " + JSON.stringify(owner));
     var firstName = getMAXString(owner.firstName);
     var lastName = getMAXString(owner.lastName);
     var state = getMAXString(owner.state);
@@ -147,9 +150,13 @@ var payment = function (itemId, buyerInfo) {
 };
 var publishSell = function(itemId, userInfoAtSellTime){
     var userInfoCodeAtSellTime = genInfoCode(userInfoAtSellTime)
-
+    
     return sellrepo.getItemById(itemId).then(function (item) {
-        item.sellCode = item.code + userInfoCodeAtSellTime;      
+        item.sellCode = item.code + userInfoCodeAtSellTime;  
+
+
+        var userInfoCodeAtSellTimeQR = encoder.encode(item.sellCode );
+        item.sellCodeWR = userInfoCodeAtSellTimeQR;          
         return sellrepo.updateItem(item);
     });
 };

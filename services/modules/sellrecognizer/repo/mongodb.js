@@ -21,7 +21,9 @@ function openConnect() {
     });
     return deferred.promise;
 }
-
+function closeDataBase(database){
+    setTimeout(function(){ database.close(true); }, 5000);
+}
 var insertItem = function (item) {
     console.log('begin repo insertItem', JSON.stringify(item));
 
@@ -119,6 +121,7 @@ var updateAllOwnerCode = function (OMID_CODE) {
                     collection.save(item);
                     console.log("updateAllOwnerCode update " + JSON.stringify(item));
                 });
+                
         } catch (e) {
             console.log("updateAllOwnerCode error " + JSON.stringify(e));
         }
@@ -146,6 +149,7 @@ var getByItemId = function (id) {
     });
 };
 var updateItem = function (itemToUpdate) {
+    var deferred = q.defer();
     openConnect().then(function (database) {
         // Insert some users
         var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.items);
@@ -162,11 +166,13 @@ var updateItem = function (itemToUpdate) {
 
             }
             //Close connection
-            database.close(true);
+            closeDataBase(database);
 
         });
 
     });
+    return deferred.promise;
+
 }
 var login = function (phone, password) {
     console.log('begin repo login ' + phone + " " + password); 
