@@ -143,7 +143,15 @@ var payment = function (itemId, buyerInfo) {
         item.buyerCode = item.code + buyerCode;
         return sellrepo.updateItem(item);
     });
-}
+};
+var publishSell = function(itemId, userInfoAtSellTime){
+    var userInfoCodeAtSellTime = genInfoCode(userInfoAtSellTime)
+
+    return sellrepo.getItemById(itemId).then(function (item) {
+        item.sellCode = item.code + userInfoCodeAtSellTime;      
+        return sellrepo.updateItem(item);
+    });
+};
 var login = function (phone, password) {
     return sellrepo.login(phone, password);
 }
@@ -158,6 +166,7 @@ module.exports =
         updateAllOwnerCode: updateAllOwnerCode,
         payment: payment,
         login: login,
-        getItems: getItems
+        getItems: getItems,
+        publishSell:publishSell,
 
     }

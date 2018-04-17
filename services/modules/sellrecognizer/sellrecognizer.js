@@ -141,6 +141,26 @@ var getCategories = function () {
 
     return deferred.promise;
 };
+
+var publishSell = function (itemId, userInfoAtSellTime) {
+    console.log("begin sellrecognizer controller publishSell " + itemId);
+    var deferred = q.defer();
+    
+    sellService.publishSell(itemId, userInfoAtSellTime)
+        .then(function (res) {
+            console.log("sellrecognizer controller publishSell " + res);
+            var res = {
+                Data: res,
+                Message: "",
+                Status: 1
+            };
+            deferred.resolve(res);
+        }
+        );
+
+    return deferred.promise;
+};
+
 var payment = function (data) {
     var itemId = data.itemId;
     var buyerInfo = data.buyerInfo;
@@ -169,5 +189,6 @@ module.exports =
         getItemBySellSectionId: getItemBySellSectionId,
         getCategories: getCategories,
         payment: payment,
-        login: login
+        login: login,
+        publishSell:publishSell,
     }
