@@ -112,6 +112,7 @@ var insertItem = function (item) {
     item.owner.code = ownerCode;
     item.section = { active: true, code: "", history:[] };
     item.buyerCode = "";
+    item.sellCode = "";
     console.log("owner code " + ownerCode + " for " + convertToString(ownerCode));
     return sellrepo.insertItem(item);
 };

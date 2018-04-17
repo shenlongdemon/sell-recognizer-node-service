@@ -142,11 +142,11 @@ var getCategories = function () {
     return deferred.promise;
 };
 
-var publishSell = function (itemId, userInfoAtSellTime) {
-    console.log("begin sellrecognizer controller publishSell " + itemId);
+var publishSell = function (obj) {
+    console.log("begin sellrecognizer controller publishSell ");
     var deferred = q.defer();
     
-    sellService.publishSell(itemId, userInfoAtSellTime)
+    sellService.publishSell(obj.itemId, obj.userInfo)
         .then(function (res) {
             console.log("sellrecognizer controller publishSell " + res);
             var res = {
