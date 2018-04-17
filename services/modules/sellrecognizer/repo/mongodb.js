@@ -158,7 +158,7 @@ var updateItem = function (itemToUpdate) {
                 console.log('repo getItems are: ', item);
                 Object.assign(item, itemToUpdate);
                 var result = collection.save(item);
-                deferred.resolve(result);
+                deferred.resolve(item);
 
             }
             //Close connection
