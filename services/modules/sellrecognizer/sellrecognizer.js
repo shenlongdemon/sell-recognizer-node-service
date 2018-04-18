@@ -105,6 +105,8 @@ var getItems = function (pageNum, pageSize) {
 
     return deferred.promise;
 };
+
+
 var getItemBySellSectionId = function (sellSectionId) {
     console.log("begin sellrecognizer controller getItemBySellSectionId " + sellSectionId);
     var deferred = q.defer();

@@ -5,7 +5,6 @@ let STRS = ["0123456789", "abcdefghij", "klmnopqrs", "tuvwxyz", "ABCDEFGHIJ", "K
 var _ = require('underscore');
 var LZString = require('lz-string');
 var MAX_DIGIT = 8;
-var encoder = require('int-encoder')
 
 function convertToNum(string) {
     var code = "";
@@ -129,6 +128,8 @@ var getItemsByOwnerId = function (ownerId, pageNum, pageSize) {
 var getItems = function (pageNum, pageSize) {
     return sellrepo.getItems(pageNum, pageSize);
 };
+
+
 var getItemBySellSectionId = function (sellSectionId) {
     return sellrepo.getItemBySellSectionId(sellSectionId);
 };
@@ -152,11 +153,7 @@ var publishSell = function(itemId, userInfoAtSellTime){
     var userInfoCodeAtSellTime = genInfoCode(userInfoAtSellTime)
     
     return sellrepo.getItemById(itemId).then(function (item) {
-        item.sellCode = item.code + userInfoCodeAtSellTime;  
-
-
-        var userInfoCodeAtSellTimeQR = encoder.encode(item.sellCode );
-        item.sellCodeWR = userInfoCodeAtSellTimeQR;          
+        item.sellCode = item.code + userInfoCodeAtSellTime;         
         return sellrepo.updateItem(item);
     });
 };
