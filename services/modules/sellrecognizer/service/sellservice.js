@@ -128,7 +128,9 @@ var getItemsByOwnerId = function (ownerId, pageNum, pageSize) {
 var getItems = function (pageNum, pageSize) {
     return sellrepo.getItems(pageNum, pageSize);
 };
-
+var getSelledItems = function (pageNum, pageSize) {
+    return sellrepo.getSelledItems(pageNum, pageSize);
+};
 
 var getItemBySellSectionId = function (sellSectionId) {
     return sellrepo.getItemBySellSectionId(sellSectionId);
@@ -173,5 +175,5 @@ module.exports =
         login: login,
         getItems: getItems,
         publishSell:publishSell,
-
+        getSelledItems:getSelledItems,
     }

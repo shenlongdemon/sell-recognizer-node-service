@@ -105,6 +105,28 @@ var getItems = function (pageNum, pageSize) {
 
     return deferred.promise;
 };
+var getSelledItems = function (pageNum, pageSize) {
+    console.log("begin sellrecognizer controller getSelledItems ");
+    var deferred = q.defer();
+    var num = parseInt(pageNum);
+    num = num < 1 ? num = 1 : num = num;
+    var size = parseInt(pageSize);
+    size = size < 1 ? size = 10 : size = size;
+
+    sellService.getSelledItems(num, size)
+        .then(function (res) {
+            console.log("sellrecognizer controller getSelledItems " + res);
+            var res = {
+                Data: res,
+                Message: "",
+                Status: 1
+            };
+            deferred.resolve(res);
+        }
+        );
+
+    return deferred.promise;
+};
 
 
 var getItemBySellSectionId = function (sellSectionId) {
@@ -125,6 +147,9 @@ var getItemBySellSectionId = function (sellSectionId) {
 
     return deferred.promise;
 };
+
+
+
 var getCategories = function () {
     console.log("begin sellrecognizer controller getCategories ");
     var deferred = q.defer();
@@ -193,4 +218,5 @@ module.exports =
         payment: payment,
         login: login,
         publishSell:publishSell,
+        getSelledItems:getSelledItems,
     }

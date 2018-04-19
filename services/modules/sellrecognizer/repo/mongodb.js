@@ -6,6 +6,7 @@ var dbConfig = require("./mongo.config");
 // Connection URL. This is where your mongodb server is running.
 var url = 'mongodb://localhost:27017/SellRecognizer';
 var q = require('q');
+var _ = require('underscore');
 
 function openConnect() {
     var deferred = q.defer();
@@ -21,8 +22,11 @@ function openConnect() {
     });
     return deferred.promise;
 }
-function closeDataBase(database){
-    setTimeout(function(){ database.close(true); }, 5000);
+function closeDataBase(database) {
+    setTimeout(function () { 
+        database.close(true); 
+        console.log("close connect db");
+    }, 5000);
 }
 var insertItem = function (item) {
     console.log('begin repo insertItem', JSON.stringify(item));
@@ -95,11 +99,20 @@ var getItemsByOwnerId = function (ownerId, pageNum, pageSize) {
     return getItemsBy(query, pageNum, pageSize);
 };
 
-var getItems = function ( pageNum, pageSize) {
+var getItems = function (pageNum, pageSize) {
     console.log('begin repo getItems');
     var query = {};
     return getItemsBy(query, pageNum, pageSize);
 };
+
+var getSelledItems = function (pageNum, pageSize) {
+    console.log('begin repo getItems');
+    var query = {$and: [{sellCode: {$exists:true}},{sellCode:{$ne:""}}]};
+    return getItemsBy(query, pageNum, pageSize);
+};
+
+
+
 var getItemBySellSectionId = function (sellSectionId) {
     var query = { "sellSections.id": sellSectionId };
     return getItemsBy(query, 1, 1);
@@ -114,14 +127,19 @@ var updateAllOwnerCode = function (OMID_CODE) {
         try {
             var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.items);
             collection.find({ $or: [{ section: undefined }, { "section.active": undefined }, { "section.active": true }] })
-                .forEach(function (item) {
-                    item.section = item.section || {};
-                    item.section.code = item.owner.code + OMID_CODE
-                    item.section.active = true;
-                    collection.save(item);
-                    console.log("updateAllOwnerCode update " + JSON.stringify(item));
+                .toArray(function (err, result) {
+                    if (err) throw err;
+                    _.each(result, function (item) {
+                        item.section = item.section || {};
+                        item.section.code = item.owner.code + OMID_CODE
+                        item.section.active = true;
+                        collection.save(item);
+                        console.log("updateAllOwnerCode update " + JSON.stringify(item));
+                    });
+
+                    closeDataBase(database);
                 });
-                
+
         } catch (e) {
             console.log("updateAllOwnerCode error " + JSON.stringify(e));
         }
@@ -175,7 +193,7 @@ var updateItem = function (itemToUpdate) {
 
 }
 var login = function (phone, password) {
-    console.log('begin repo login ' + phone + " " + password); 
+    console.log('begin repo login ' + phone + " " + password);
     var deferred = q.defer();
     openConnect().then(function (database) {
         var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.users);
@@ -201,5 +219,6 @@ module.exports =
         updateAllOwnerCode: updateAllOwnerCode,
         updateItem: updateItem,
         login: login,
-        getItems:getItems
+        getItems: getItems,
+        getSelledItems:getSelledItems,
     }
