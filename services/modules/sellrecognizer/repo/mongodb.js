@@ -23,8 +23,8 @@ function openConnect() {
     return deferred.promise;
 }
 function closeDataBase(database) {
-    setTimeout(function () { 
-        database.close(true); 
+    setTimeout(function () {
+        database.close(true);
         console.log("close connect db");
     }, 5000);
 }
@@ -65,25 +65,35 @@ var getBy = function (collectionName, query, pageNum, pageSize) {
     openConnect().then(function (database) {
         // Insert some users
         var collection = database.db(dbConfig.dbname).collection(collectionName);
-
-        collection.find(query)
-            .sort({ _id: -1 }).skip((num - 1) * size).limit(size).toArray(function (err, result) {
+        if (num == 1 && size == 1) {
+            collection.findOne(query).then(function (item, err) {
                 if (err) {
                     console.log("repo getItems error when find " + err);
                     deferred.reject(err);
                 } else {
-                    console.log('repo getItems are: ', result);
-                    if (size == 1 && result.length > 0) {
-                        deferred.resolve(result[0]);
-                    }
-                    else {
-                        deferred.resolve(result);
-                    }
+                    console.log('repo getItem is: ', item);
+                    deferred.resolve(item);
                 }
                 //Close connection
                 database.close(true);
 
             });
+        }
+        else {
+            collection.find(query)
+                .sort({ _id: -1 }).skip((num - 1) * size).limit(size).toArray(function (err, result) {
+                    if (err) {
+                        console.log("repo getItems error when find " + err);
+                        deferred.reject(err);
+                    } else {
+                        console.log('repo getItems are: ', result);
+                        deferred.resolve(result);
+                    }
+                    //Close connection
+                    database.close(true);
+
+                });
+        }
     });
     return deferred.promise;
 };
@@ -107,7 +117,7 @@ var getItems = function (pageNum, pageSize) {
 
 var getSelledItems = function (pageNum, pageSize) {
     console.log('begin repo getItems');
-    var query = {$and: [{sellCode: {$exists:true}},{sellCode:{$ne:""}}]};
+    var query = { $and: [{ sellCode: { $exists: true } }, { sellCode: { $ne: "" } }] };
     return getItemsBy(query, pageNum, pageSize);
 };
 
@@ -166,6 +176,12 @@ var getByItemId = function (id) {
 
     });
 };
+var getItemByQRCode = function (qrCode) {
+    console.log("mongodb getItemByQRCode " + qrCode);
+    var query = { code: qrCode };
+    return getItemsBy(query, 1, 1);
+};
+
 var updateItem = function (itemToUpdate) {
     var deferred = q.defer();
     openConnect().then(function (database) {
@@ -177,7 +193,7 @@ var updateItem = function (itemToUpdate) {
                 console.log("repo updateItem error when findOne " + err);
                 deferred.reject(err);
             } else {
-                console.log('repo getItems are: ', item);
+                console.log('repo updateItem are: ', item);
                 Object.assign(item, itemToUpdate);
                 var result = collection.save(item);
                 deferred.resolve(item);
@@ -220,5 +236,6 @@ module.exports =
         updateItem: updateItem,
         login: login,
         getItems: getItems,
-        getSelledItems:getSelledItems,
+        getSelledItems: getSelledItems,
+        getItemByQRCode: getItemByQRCode,
     }

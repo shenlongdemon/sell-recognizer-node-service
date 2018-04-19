@@ -47,7 +47,6 @@ function getMAXString(string) {
     }
 }
 
-//Dead Kjhkhjk
 function genInfoCode(owner) {
     console.log("sellservice genInfoCode " + JSON.stringify(owner));
     var firstName = getMAXString(owner.firstName);
@@ -88,24 +87,6 @@ var updateAllOwnerCode = function (OMID_CODE) {
     return sellrepo.updateAllOwnerCode(OMID_CODE);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 var insertItem = function (item) {
     item.id = uuid.v4();
     var itemCode = genItemCode(item);
@@ -138,12 +119,15 @@ var getItemBySellSectionId = function (sellSectionId) {
 var getCategories = function () {
     return sellrepo.getCategories();
 };
-
+var getItemByQRCode = function (qrCode) {
+    return sellrepo.getItemByQRCode(qrCode);
+};
+ 
 var payment = function (itemId, buyerInfo) {
     var buyerCode = genInfoCode(buyerInfo);
     buyerInfo.code = buyerCode;
     return sellrepo.getItemById(itemId).then(function (item) {
-
+        item.section = item.section || {};
         item.section.history = item.section.history || [];
         item.section.history.push(item.owner);
         item.owner = buyerInfo;
@@ -176,4 +160,5 @@ module.exports =
         getItems: getItems,
         publishSell:publishSell,
         getSelledItems:getSelledItems,
+        getItemByQRCode:getItemByQRCode,
     }

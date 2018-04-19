@@ -147,6 +147,24 @@ var getItemBySellSectionId = function (sellSectionId) {
 
     return deferred.promise;
 };
+var getItemByQRCode = function (qrCode) {
+    console.log("begin sellrecognizer controller getItemByQRCode " + qrCode);
+    var deferred = q.defer();
+
+    sellService.getItemByQRCode(qrCode)
+        .then(function (item) {
+            console.log("sellrecognizer controller getItemByQRCode " + item);
+            var res = {
+                Data: item,
+                Message: "",
+                Status: 1
+            };
+            deferred.resolve(res);
+        }
+        );
+
+    return deferred.promise;
+};
 
 
 
@@ -219,4 +237,5 @@ module.exports =
         login: login,
         publishSell:publishSell,
         getSelledItems:getSelledItems,
+        getItemByQRCode:getItemByQRCode,
     }
