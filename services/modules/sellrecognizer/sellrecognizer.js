@@ -127,7 +127,25 @@ var getSelledItems = function (pageNum, pageSize) {
 
     return deferred.promise;
 };
+var updateUser = function (data) {
+    console.log("begin sellrecognizer controller updateUser ");
+    var userId = data.id;
+    var user = data.user;
+    var deferred = q.defer();
+    sellService.updateUser(userId, user)
+        .then(function (res) {
+            console.log("sellrecognizer controller updateUser " + res);
+            var res = {
+                Data: res,
+                Message: "",
+                Status: 1
+            };
+            deferred.resolve(res);
+        }
+    );
 
+    return deferred.promise;
+};
 
 var getItemBySellSectionId = function (sellSectionId) {
     console.log("begin sellrecognizer controller getItemBySellSectionId " + sellSectionId);
@@ -190,7 +208,7 @@ var getCategories = function () {
 var publishSell = function (obj) {
     console.log("begin sellrecognizer controller publishSell ");
     var deferred = q.defer();
-    
+
     sellService.publishSell(obj.itemId, obj.userInfo)
         .then(function (res) {
             console.log("sellrecognizer controller publishSell " + res);
@@ -207,9 +225,18 @@ var publishSell = function (obj) {
 };
 
 var payment = function (data) {
+    var deferred = q.defer();
     var itemId = data.itemId;
-    var buyerInfo = data.buyerInfo;
-    return sellService.payment(itemId, buyerInfo);
+    var buyerInfo = data.buyerInfo;    
+    sellService.payment(itemId, buyerInfo).then(function (item) {
+        var res = {
+            Data: item,
+            Message: item != null ? "" : "Cannot pay",
+            Status: item != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
 }
 var login = function (phone, password) {
     var deferred = q.defer();
@@ -223,6 +250,63 @@ var login = function (phone, password) {
     });
     return deferred.promise;
 }
+var getProductsByCodes= function (names) {
+
+    console.log("begin sellrecognizer controller getProductsByCodes " + names.length);
+    var deferred = q.defer();
+    sellService.getProductsByCodes(names).then(function (item) {
+        console.log("begin sellrecognizer controller getProductsByCodes return " + item.length);
+        var res = {
+            Data: item,
+            Message: "",
+            Status: item != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+var getProductsByCategory = function(categoryId, pageNum, pageSize){
+    console.log("begin sellrecognizer controller getProductsByCategory " + categoryId);
+    var deferred = q.defer();
+    sellService.getProductsByCategory(categoryId, pageNum, pageSize).then(function (item) {
+        var res = {
+            Data: item,
+            Message: "",
+            Status: item != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+var getItemsByCodes = function (names) {
+
+    console.log("begin sellrecognizer controller getItemsByCodes " + names.length);
+    var deferred = q.defer();
+    sellService.getItemsByCodes(names).then(function (item) {
+        var res = {
+            Data: item,
+            Message: "",
+            Status: item != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+var confirmReceiveItem = function (id) {
+
+    console.log("begin sellrecognizer controller confirmReceiveItem " + id);
+    var deferred = q.defer();
+    sellService.confirmReceiveItem(id).then(function (item) {
+        var res = {
+            Data: item,
+            Message: "",
+            Status: item != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+
 module.exports =
     {
         searchImage: searchImage,
@@ -235,7 +319,12 @@ module.exports =
         getCategories: getCategories,
         payment: payment,
         login: login,
-        publishSell:publishSell,
-        getSelledItems:getSelledItems,
-        getItemByQRCode:getItemByQRCode,
+        publishSell: publishSell,
+        getSelledItems: getSelledItems,
+        getItemByQRCode: getItemByQRCode,
+        updateUser: updateUser,
+        getItemsByCodes:getItemsByCodes,
+        getProductsByCodes:getProductsByCodes,
+        confirmReceiveItem:confirmReceiveItem,
+        getProductsByCategory:getProductsByCategory,
     }

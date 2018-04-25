@@ -3,9 +3,10 @@ var sellrepo = require("../repo/mongodb");
 var uuid = require("uuid");
 let STRS = ["0123456789", "abcdefghij", "klmnopqrs", "tuvwxyz", "ABCDEFGHIJ", "KLMNOPQRS", "TUVWXYZ", "-/ _+'.,;:", "[]{}"];
 var _ = require('underscore');
+var lzjs = require('lzjs');
+
 var LZString = require('lz-string');
 var MAX_DIGIT = 8;
-
 function convertToNum(string) {
     var code = "";
     Array.from(string).map((c, key) => {
@@ -47,17 +48,12 @@ function getMAXString(string) {
     }
 }
 
-function genInfoCode(owner) {
-    console.log("sellservice genInfoCode " + JSON.stringify(owner));
-    var firstName = getMAXString(owner.firstName);
-    var lastName = getMAXString(owner.lastName);
-    var state = getMAXString(owner.state);
-    var country = getMAXString(owner.country);
-    var zipCode = getMAXString(owner.zipCode);
+function genInfoCode(action, owner) {
+    console.log("sellservice genInfoCode " + action + " " + JSON.stringify(owner)); 
 
-    var allStr = " " + firstName + " " + lastName + " " + state + " " + zipCode + " " + country
+    var allStr = " " + action + " " + owner.firstName + " " + owner.lastName + " " + owner.state + " " + owner.zipCode + " " + owner.country
         + "[" + owner.position.coords.latitude + "," + owner.position.coords.longitude + " " + owner.position.coords.altitude + "] "
-        + owner.weather.main.temp + "C";
+        + owner.weather.main.temp + "C"  + " " + owner.time;
     var code = convertToNum(allStr);
     console.log("genPersonalCode " + code);
     return code;
@@ -79,27 +75,18 @@ function autoUpdateAllOwnerCode(info) {
 }
 
 var updateOMIDCODE = function (info) {
-    var OMID_CODE = genInfoCode(info);
-    this.updateAllOwnerCode(OMID_CODE);
-    return OMID_CODE;
+    var OM_C = genInfoCode(info);
+    global.OMID_CODE = OM_C;
+    return OM_C;
 };
-var updateAllOwnerCode = function (OMID_CODE) {
-    return sellrepo.updateAllOwnerCode(OMID_CODE);
+var updateAllOwnerCode = function () {
+    return sellrepo.updateAllOwnerCode(global.OMID_CODE);
 }
 
-var insertItem = function (item) {
-    item.id = uuid.v4();
-    var itemCode = genItemCode(item);
-    var ownerCode = itemCode + genInfoCode(item.owner)
-    item.code = itemCode;
-    item.owner.code = ownerCode;
-    item.section = { active: true, code: "", history:[] };
-    item.buyerCode = "";
-    item.sellCode = "";
-    console.log("owner code " + ownerCode + " for " + convertToString(ownerCode));
-    return sellrepo.insertItem(item);
-};
 
+var updateUser = function (userId, usertoUpdate) {
+    return sellrepo.updateUser(userId, usertoUpdate);
+};
 var getItemById = function (id) {
     return sellrepo.getItemById(id);
 };
@@ -120,31 +107,67 @@ var getCategories = function () {
     return sellrepo.getCategories();
 };
 var getItemByQRCode = function (qrCode) {
-    return sellrepo.getItemByQRCode(qrCode);
+    var qr = lzjs.decompress(qrCode);
+    return sellrepo.getItemByQRCode(qr);
 };
- 
+var insertItem = function (item) {
+    item.id = uuid.v4();
+    var itemCode = genItemCode(item);
+    var ownerCode = itemCode + genInfoCode("[Product]", item.owner)
+    item.code = itemCode + ownerCode;
+    item.owner.code = ownerCode;
+    item.section = { active: true, code: "", history: [] };
+    item.section.history.push(item.owner);
+    item.buyerCode = "";
+    item.sellCode = "";
+    item.buyer = undefined;
+    console.log("owner code " + ownerCode + " for " + convertToString(ownerCode));
+    return sellrepo.insertItem(item);
+};
 var payment = function (itemId, buyerInfo) {
-    var buyerCode = genInfoCode(buyerInfo);
+    var buyerCode = genInfoCode("[Buy]", buyerInfo);
     buyerInfo.code = buyerCode;
-    return sellrepo.getItemById(itemId).then(function (item) {
-        item.section = item.section || {};
-        item.section.history = item.section.history || [];
-        item.section.history.push(item.owner);
-        item.owner = buyerInfo;
-        item.buyerCode = item.code + buyerCode;
-        return sellrepo.updateItem(item);
+    var deferred = q.defer();
+    sellrepo.getItemById(itemId).then(function (item) {
+
+        item.section.history.push(buyerInfo);
+        item.buyer = buyerInfo;
+        item.buyerCode = item.section.code + buyerCode;
+        sellrepo.updateItem(item).then((res) => {
+            deferred.resolve(res);
+        });
     });
+    return deferred.promise;
 };
-var publishSell = function(itemId, userInfoAtSellTime){
-    var userInfoCodeAtSellTime = genInfoCode(userInfoAtSellTime)
-    
-    return sellrepo.getItemById(itemId).then(function (item) {
-        item.sellCode = item.code + userInfoCodeAtSellTime;         
-        return sellrepo.updateItem(item);
+var confirmReceiveItem = function (itemId) {
+    var deferred = q.defer();
+    sellrepo.getItemById(itemId).then(function (item) {
+        item.code = genItemCode(item) + genInfoCode("[Own]", item.buyer)
+        item.owner = item.buyer;
+        item.buyer = undefined;
+        item.buyerCode = "";
+        item.sellCode = "";
+        sellrepo.updateItem(item).then((res) => {
+            deferred.resolve(res);
+        });
     });
+    return deferred.promise;
+};
+var publishSell = function (itemId, userInfoAtSellTime) {
+    var userInfoCodeAtSellTime = genInfoCode("[Sell]",userInfoAtSellTime)
+    return sellrepo.publishSell(itemId, userInfoCodeAtSellTime);
 };
 var login = function (phone, password) {
     return sellrepo.login(phone, password);
+}
+var getItemsByCodes = function (names) {
+    return sellrepo.getItemsByCodes(names);
+}
+var getProductsByCodes = function (names) {
+    return sellrepo.getProductsByCodes(names);
+}
+var getProductsByCategory= function(categoryId, pageNum, pageSize){
+    return sellrepo.getProductsByCategory(categoryId, pageNum, pageSize);
 }
 module.exports =
     {
@@ -158,7 +181,12 @@ module.exports =
         payment: payment,
         login: login,
         getItems: getItems,
-        publishSell:publishSell,
-        getSelledItems:getSelledItems,
-        getItemByQRCode:getItemByQRCode,
+        publishSell: publishSell,
+        getSelledItems: getSelledItems,
+        getItemByQRCode: getItemByQRCode,
+        updateUser: updateUser,
+        getItemsByCodes: getItemsByCodes,
+        getProductsByCodes: getProductsByCodes,
+        confirmReceiveItem: confirmReceiveItem,
+        getProductsByCategory:getProductsByCategory,
     }

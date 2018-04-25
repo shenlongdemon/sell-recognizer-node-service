@@ -136,15 +136,17 @@ var updateAllOwnerCode = function (OMID_CODE) {
         // Insert some users
         try {
             var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.items);
-            collection.find({ $or: [{ section: undefined }, { "section.active": undefined }, { "section.active": true }] })
+            //collection.find({ $or: [{ section: undefined }, { "section.active": undefined }, { "section.active": true }] })
+            collection.find({ $where: 'this.sellCode.length > 0 && this.buyerCode.length == 0' })
+
                 .toArray(function (err, result) {
                     if (err) throw err;
                     _.each(result, function (item) {
                         item.section = item.section || {};
-                        item.section.code = item.owner.code + OMID_CODE
+                        item.section.code = item.code + item.owner.code + item.sellCode + OMID_CODE;
                         item.section.active = true;
                         collection.save(item);
-                        console.log("updateAllOwnerCode update " + JSON.stringify(item));
+                        console.log("updateAllOwnerCode update code" + item.section.code);
                     });
 
                     closeDataBase(database);
@@ -178,7 +180,20 @@ var getByItemId = function (id) {
 };
 var getItemByQRCode = function (qrCode) {
     console.log("mongodb getItemByQRCode " + qrCode);
-    var query = { code: qrCode };
+    var query = {
+        $and: [
+            {
+                $or:[
+                    {code: qrCode },
+                    {sellCode: qrCode },
+                    {buyerCode: qrCode },
+                    {"section.code": qrCode }
+                ]
+            },
+            {$where:'this.sellCode.length > 0'}
+        ]
+        
+    };
     return getItemsBy(query, 1, 1);
 };
 
@@ -193,7 +208,7 @@ var updateItem = function (itemToUpdate) {
                 console.log("repo updateItem error when findOne " + err);
                 deferred.reject(err);
             } else {
-                console.log('repo updateItem are: ', item);
+                console.log('repo updateItem are: ', item);                
                 Object.assign(item, itemToUpdate);
                 var result = collection.save(item);
                 deferred.resolve(item);
@@ -208,6 +223,59 @@ var updateItem = function (itemToUpdate) {
     return deferred.promise;
 
 }
+
+var updateUser = function (userId, userDetail) {
+    var deferred = q.defer();
+    openConnect().then(function (database) {
+        // Insert some users
+        var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.users);
+
+        collection.findOne({ id: userId}).then(function (user, err) {
+            if (err) {
+                console.log("repo updateUser error when findOne " + err);
+                deferred.reject(err);
+            } else {
+                console.log('repo updateItem are: ', user);
+                delete userDetail._id;
+                Object.assign(user, userDetail);
+                var result = collection.save(user);
+                deferred.resolve(user);
+
+            }
+            //Close connection
+            closeDataBase(database);
+
+        });
+
+    });
+    return deferred.promise;
+
+}
+var publishSell = function(itemId, userInfoCodeAtSellTime){
+    console.log('begin repo publishSell ' + itemId + " " + userInfoCodeAtSellTime);
+    var deferred = q.defer();
+    openConnect().then(function (database) {
+        var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.items);
+        collection.findOne({ id: itemId}).then(function (item, err) {
+            if (err) {
+                console.log("repo updateUser error when findOne " + err);
+                deferred.reject(err);
+            } else {
+                console.log('repo publishSell are: ', item);
+                item.sellCode = userInfoCodeAtSellTime;
+                var result = collection.save(item);
+                deferred.resolve(item);
+
+            }
+            //Close connection
+            closeDataBase(database);
+
+        });
+    });
+    return deferred.promise;
+
+}
+
 var login = function (phone, password) {
     console.log('begin repo login ' + phone + " " + password);
     var deferred = q.defer();
@@ -225,6 +293,31 @@ var login = function (phone, password) {
     });
     return deferred.promise;
 };
+var getItemsByCodes = function (names) {
+    var query = {code:{"$in" : names}};
+    return getBy(dbConfig.collections.items, query, 1, 0); 
+};
+var getProductsByCodes = function (names) {
+    var query = {
+        $and: [
+            {code:{"$in" : names}},
+            {$where:'this.sellCode.length > 0'}
+        ]
+        
+    };
+    return getBy(dbConfig.collections.items, query, 1, 0); 
+};
+var getProductsByCategory= function(categoryId, pageNum, pageSize){
+    var query = {
+        $and: [
+            {$where:'this.sellCode.length > 0'},
+            {$where:'this.buyerCode.length == 0'},
+            {'category.id':categoryId}
+        ]
+        
+    };
+    return getBy(dbConfig.collections.items, query, pageNum, pageSize); 
+};
 module.exports =
     {
         insertItem: insertItem,
@@ -238,4 +331,9 @@ module.exports =
         getItems: getItems,
         getSelledItems: getSelledItems,
         getItemByQRCode: getItemByQRCode,
+        updateUser:updateUser,
+        publishSell : publishSell,
+        getItemsByCodes: getItemsByCodes ,
+        getProductsByCodes:getProductsByCodes,
+        getProductsByCategory:getProductsByCategory,
     }
