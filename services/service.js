@@ -15,10 +15,10 @@ module.exports =
 		var deferred = q.defer();
 		try{
 			var ret = eval(service +'["' + action + '"](...obj)');		
-			deferred.resolve(ret);	
-			
+			deferred.resolve(ret);				
 		}
 		catch(ex){
+            console.log("service call doaction " + service + "/" + action + " error " + JSON.stringify(ex));
 			deferred.reject(ex);
 		}
     	return deferred.promise;

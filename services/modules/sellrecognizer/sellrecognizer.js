@@ -265,6 +265,21 @@ var getProductsByCodes= function (names) {
     });
     return deferred.promise;
 }
+var getProductsByBluetoothCodes = function (names) {
+
+    console.log("begin sellrecognizer controller getProductsByBluetoothCodes " + names.length);
+    var deferred = q.defer();
+    sellService.getProductsByBluetoothCodes(names).then(function (item) {
+        console.log("begin sellrecognizer controller getProductsByBluetoothCodes return " + item.length);
+        var res = {
+            Data: item,
+            Message: "",
+            Status: item != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
 var getProductsByCategory = function(categoryId, pageNum, pageSize){
     console.log("begin sellrecognizer controller getProductsByCategory " + categoryId);
     var deferred = q.defer();
@@ -306,7 +321,27 @@ var confirmReceiveItem = function (id) {
     });
     return deferred.promise;
 }
+var cancelSell = function (id) {
 
+    console.log("begin sellrecognizer controller cancelSell " + id);
+    var deferred = q.defer();
+    sellService.cancelSell(id).then(function (item) {
+        var res = {
+            Data: item,
+            Message: "",
+            Status: item != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    }).catch((ex) => {
+        var res = {
+            Data: ex,
+            Message: ex.Message,
+            Status: 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
 module.exports =
     {
         searchImage: searchImage,
@@ -327,4 +362,6 @@ module.exports =
         getProductsByCodes:getProductsByCodes,
         confirmReceiveItem:confirmReceiveItem,
         getProductsByCategory:getProductsByCategory,
+        cancelSell:cancelSell,
+        getProductsByBluetoothCodes:getProductsByBluetoothCodes,
     }

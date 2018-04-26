@@ -49,11 +49,11 @@ function getMAXString(string) {
 }
 
 function genInfoCode(action, owner) {
-    console.log("sellservice genInfoCode " + action + " " + JSON.stringify(owner)); 
+    console.log("sellservice genInfoCode " + action + " " + JSON.stringify(owner));
 
     var allStr = " " + action + " " + owner.firstName + " " + owner.lastName + " " + owner.state + " " + owner.zipCode + " " + owner.country
         + "[" + owner.position.coords.latitude + "," + owner.position.coords.longitude + " " + owner.position.coords.altitude + "] "
-        + owner.weather.main.temp + "C"  + " " + owner.time;
+        + owner.weather.main.temp + "C" + " " + owner.time;
     var code = convertToNum(allStr);
     console.log("genPersonalCode " + code);
     return code;
@@ -115,6 +115,7 @@ var insertItem = function (item) {
     var itemCode = genItemCode(item);
     var ownerCode = itemCode + genInfoCode("[Product]", item.owner)
     item.code = itemCode + ownerCode;
+    item.bluetoothCode = itemCode + ownerCode;
     item.owner.code = ownerCode;
     item.section = { active: true, code: "", history: [] };
     item.section.history.push(item.owner);
@@ -128,9 +129,7 @@ var payment = function (itemId, buyerInfo) {
     var buyerCode = genInfoCode("[Buy]", buyerInfo);
     buyerInfo.code = buyerCode;
     var deferred = q.defer();
-    sellrepo.getItemById(itemId).then(function (item) {
-
-        item.section.history.push(buyerInfo);
+    sellrepo.getItemById(itemId).then(function (item) {        
         item.buyer = buyerInfo;
         item.buyerCode = item.section.code + buyerCode;
         sellrepo.updateItem(item).then((res) => {
@@ -143,6 +142,7 @@ var confirmReceiveItem = function (itemId) {
     var deferred = q.defer();
     sellrepo.getItemById(itemId).then(function (item) {
         item.code = genItemCode(item) + genInfoCode("[Own]", item.buyer)
+        item.section.history.push(item.buyer);
         item.owner = item.buyer;
         item.buyer = undefined;
         item.buyerCode = "";
@@ -154,7 +154,7 @@ var confirmReceiveItem = function (itemId) {
     return deferred.promise;
 };
 var publishSell = function (itemId, userInfoAtSellTime) {
-    var userInfoCodeAtSellTime = genInfoCode("[Sell]",userInfoAtSellTime)
+    var userInfoCodeAtSellTime = genInfoCode("[Sell]", userInfoAtSellTime)
     return sellrepo.publishSell(itemId, userInfoCodeAtSellTime);
 };
 var login = function (phone, password) {
@@ -166,8 +166,15 @@ var getItemsByCodes = function (names) {
 var getProductsByCodes = function (names) {
     return sellrepo.getProductsByCodes(names);
 }
-var getProductsByCategory= function(categoryId, pageNum, pageSize){
+var getProductsByBluetoothCodes = function (names) {
+    return sellrepo.getProductsByBluetoothCodes(names);
+}
+
+var getProductsByCategory = function (categoryId, pageNum, pageSize) {
     return sellrepo.getProductsByCategory(categoryId, pageNum, pageSize);
+}
+var cancelSell = function (id) {
+    return sellrepo.cancelSell(id);
 }
 module.exports =
     {
@@ -188,5 +195,7 @@ module.exports =
         getItemsByCodes: getItemsByCodes,
         getProductsByCodes: getProductsByCodes,
         confirmReceiveItem: confirmReceiveItem,
-        getProductsByCategory:getProductsByCategory,
+        getProductsByCategory: getProductsByCategory,
+        cancelSell: cancelSell,
+        getProductsByBluetoothCodes:getProductsByBluetoothCodes,
     }
