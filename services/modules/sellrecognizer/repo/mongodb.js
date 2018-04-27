@@ -143,7 +143,7 @@ var updateAllOwnerCode = function (OMID_CODE) {
                     if (err) throw err;
                     _.each(result, function (item) {
                         item.section = item.section || {};
-                        item.section.code = item.code + item.owner.code + item.sellCode + OMID_CODE;
+                        item.section.code = item.sellCode + OMID_CODE;
                         item.section.active = true;
                         collection.save(item);
                         console.log("updateAllOwnerCode update code" + item.section.code);
@@ -262,7 +262,8 @@ var publishSell = function (itemId, userInfoCodeAtSellTime) {
                 deferred.reject(err);
             } else {
                 console.log('repo publishSell are: ', item);
-                item.sellCode = userInfoCodeAtSellTime;
+                item.sellCode = item.code + userInfoCodeAtSellTime;
+                item.section.code = item.code + userInfoCodeAtSellTime + global.OMID_CODE;
                 var result = collection.save(item);
                 deferred.resolve(item);
 
@@ -283,9 +284,10 @@ var login = function (phone, password) {
         var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.users);
         collection.findOne({ $and: [{ phone: phone }, { password: password }] }).then(function (item, err) {
             if (err) {
-                console.log("repo updateItem error when findOne " + err);
+                console.log("repo login error when login " + err);
                 deferred.reject(err);
             } else {
+                console.log("repo login error when login " + JSON.stringify(item));
                 deferred.resolve(item);
             }
             database.close(true);

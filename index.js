@@ -9,7 +9,7 @@ controller   = require("./controllers/controller"),
 mongodb      = require("./services/modules/sellrecognizer/repo/mongodb"),
 schedule     = require("./schedule/schedule")
 ;
-global.OMID_CODE = "OMID_CODE";
+global.OMID_CODE = "";
 
 var app = express();
 

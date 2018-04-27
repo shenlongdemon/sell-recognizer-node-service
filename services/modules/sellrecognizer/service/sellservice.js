@@ -27,13 +27,19 @@ function convertToNum(string) {
 function convertToString(string) {
     var code = "";
     var i = 0;
-    for (i; i < string.length / 2; i++) {
-        var str = string.substr(i * 2, 2);
+    try {
+        for (i; i < string.length / 2; i++) {
+            var str = string.substr(i * 2, 2);
 
-        var idxStrs = parseInt(str.charAt(0));
-        var idxStr = parseInt(str.charAt(1));
-        //console.log("convertToString " + str + " to " + STRS[idxStrs].charAt(idxStr));
-        code += STRS[idxStrs].charAt(idxStr);
+            var idxStrs = parseInt(str.charAt(0));
+            var idxStr = parseInt(str.charAt(1));
+            //console.log("convertToString " + str + " to " + STRS[idxStrs].charAt(idxStr));
+            code += STRS[idxStrs].charAt(idxStr);
+        }
+    }
+    catch (e) {
+        console.log("convertToString Error " + string + " to " + JSON.stringify(e));
+
     }
     console.log("convertToString " + string + " to " + code);
     return code;
@@ -80,6 +86,7 @@ var updateOMIDCODE = function (info) {
     return OM_C;
 };
 var updateAllOwnerCode = function () {
+    global.OMID_CODE = convertToNum(uuid.v4());
     return sellrepo.updateAllOwnerCode(global.OMID_CODE);
 }
 
@@ -113,7 +120,7 @@ var getItemByQRCode = function (qrCode) {
 var insertItem = function (item) {
     item.id = uuid.v4();
     var itemCode = genItemCode(item);
-    var ownerCode = itemCode + genInfoCode("[Product]", item.owner)
+    var ownerCode = genInfoCode("[Product]", item.owner)
     item.code = itemCode + ownerCode;
     item.bluetoothCode = itemCode + ownerCode;
     item.owner.code = ownerCode;
@@ -129,7 +136,7 @@ var payment = function (itemId, buyerInfo) {
     var buyerCode = genInfoCode("[Buy]", buyerInfo);
     buyerInfo.code = buyerCode;
     var deferred = q.defer();
-    sellrepo.getItemById(itemId).then(function (item) {        
+    sellrepo.getItemById(itemId).then(function (item) {
         item.buyer = buyerInfo;
         item.buyerCode = item.section.code + buyerCode;
         sellrepo.updateItem(item).then((res) => {
@@ -154,6 +161,7 @@ var confirmReceiveItem = function (itemId) {
     return deferred.promise;
 };
 var publishSell = function (itemId, userInfoAtSellTime) {
+    global.OMID_CODE = convertToNum(uuid.v4());
     var userInfoCodeAtSellTime = genInfoCode("[Sell]", userInfoAtSellTime)
     return sellrepo.publishSell(itemId, userInfoCodeAtSellTime);
 };
@@ -169,7 +177,13 @@ var getProductsByCodes = function (names) {
 var getProductsByBluetoothCodes = function (names) {
     return sellrepo.getProductsByBluetoothCodes(names);
 }
+var getDescriptionQRCode = function (qrCode) {
+    var deferred = q.defer();
 
+    var str = convertToString(qrCode);
+    deferred.resolve(str);
+    return deferred.promise;
+}
 var getProductsByCategory = function (categoryId, pageNum, pageSize) {
     return sellrepo.getProductsByCategory(categoryId, pageNum, pageSize);
 }
@@ -197,5 +211,6 @@ module.exports =
         confirmReceiveItem: confirmReceiveItem,
         getProductsByCategory: getProductsByCategory,
         cancelSell: cancelSell,
-        getProductsByBluetoothCodes:getProductsByBluetoothCodes,
+        getProductsByBluetoothCodes: getProductsByBluetoothCodes,
+        getDescriptionQRCode: getDescriptionQRCode,
     }

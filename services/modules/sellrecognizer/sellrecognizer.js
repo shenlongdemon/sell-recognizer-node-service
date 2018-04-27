@@ -142,7 +142,7 @@ var updateUser = function (data) {
             };
             deferred.resolve(res);
         }
-    );
+        );
 
     return deferred.promise;
 };
@@ -227,7 +227,7 @@ var publishSell = function (obj) {
 var payment = function (data) {
     var deferred = q.defer();
     var itemId = data.itemId;
-    var buyerInfo = data.buyerInfo;    
+    var buyerInfo = data.buyerInfo;
     sellService.payment(itemId, buyerInfo).then(function (item) {
         var res = {
             Data: item,
@@ -250,7 +250,7 @@ var login = function (phone, password) {
     });
     return deferred.promise;
 }
-var getProductsByCodes= function (names) {
+var getProductsByCodes = function (names) {
 
     console.log("begin sellrecognizer controller getProductsByCodes " + names.length);
     var deferred = q.defer();
@@ -280,7 +280,24 @@ var getProductsByBluetoothCodes = function (names) {
     });
     return deferred.promise;
 }
-var getProductsByCategory = function(categoryId, pageNum, pageSize){
+var getDescriptionQRCode = function (qrCode) {
+
+    console.log("begin sellrecognizer controller getDescriptionQRCode " + JSON.stringify(qrCode.code));
+    var deferred = q.defer();
+    sellService.getDescriptionQRCode(qrCode.code).then(function (item) {
+        console.log("begin sellrecognizer controller getDescriptionQRCode return " + item);
+        var res = {
+            Data: item,
+            Message: "",
+            Status: item != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+
+
+var getProductsByCategory = function (categoryId, pageNum, pageSize) {
     console.log("begin sellrecognizer controller getProductsByCategory " + categoryId);
     var deferred = q.defer();
     sellService.getProductsByCategory(categoryId, pageNum, pageSize).then(function (item) {
@@ -358,10 +375,11 @@ module.exports =
         getSelledItems: getSelledItems,
         getItemByQRCode: getItemByQRCode,
         updateUser: updateUser,
-        getItemsByCodes:getItemsByCodes,
-        getProductsByCodes:getProductsByCodes,
-        confirmReceiveItem:confirmReceiveItem,
-        getProductsByCategory:getProductsByCategory,
-        cancelSell:cancelSell,
-        getProductsByBluetoothCodes:getProductsByBluetoothCodes,
+        getItemsByCodes: getItemsByCodes,
+        getProductsByCodes: getProductsByCodes,
+        confirmReceiveItem: confirmReceiveItem,
+        getProductsByCategory: getProductsByCategory,
+        cancelSell: cancelSell,
+        getProductsByBluetoothCodes: getProductsByBluetoothCodes,
+        getDescriptionQRCode: getDescriptionQRCode,
     }
