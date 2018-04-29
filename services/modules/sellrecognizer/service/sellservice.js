@@ -120,7 +120,7 @@ var getCategories = function () {
     return sellrepo.getCategories();
 };
 var getItemByQRCode = function (qrCode) {
-    var qr = lzjs.decompress(qrCode);
+    var qr = qrCode; //lzjs.decompress(qrCode);
     return sellrepo.getItemByQRCode(qr);
 };
 var insertItem = function (item) {
@@ -128,7 +128,7 @@ var insertItem = function (item) {
     var itemCode = genItemCode(item);
     var ownerCode = genInfoCode("[Product]", item.owner)
     item.code = itemCode + ownerCode;
-    item.bluetoothCode = itemCode + ownerCode;
+    item.bluetoothCode = uuid.v4();
     item.owner.code = ownerCode;
     item.section = { active: true, code: "", history: [] };
     item.section.history.push(item.owner);

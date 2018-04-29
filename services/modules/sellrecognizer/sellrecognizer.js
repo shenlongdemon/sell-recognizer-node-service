@@ -166,10 +166,10 @@ var getItemBySellSectionId = function (sellSectionId) {
     return deferred.promise;
 };
 var getItemByQRCode = function (qrCode) {
-    console.log("begin sellrecognizer controller getItemByQRCode " + qrCode);
+    console.log("begin sellrecognizer controller getItemByQRCode " + qrCode.code);
     var deferred = q.defer();
 
-    sellService.getItemByQRCode(qrCode)
+    sellService.getItemByQRCode(qrCode.code)
         .then(function (item) {
             console.log("sellrecognizer controller getItemByQRCode " + item);
             var res = {
