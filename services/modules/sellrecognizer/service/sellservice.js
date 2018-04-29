@@ -82,10 +82,15 @@ function autoUpdateAllOwnerCode(info) {
 }
 
 var updateOMIDCODE = function (info) {
-    var OM_C = genInfoCode('[TOKEN]' ,info);
+    var OM_C = genInfoCode('[TOKEN]', info);
     global.OMID_CODE = OM_C;
     updateAllOwnerCode();
-    return OM_C;
+    var description = convertToString(OM_C);
+    var res = {
+        code: OM_C,
+        str: description
+    };
+    return res;
 };
 var updateAllOwnerCode = function () {
     return sellrepo.updateAllOwnerCode(global.OMID_CODE);
