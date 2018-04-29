@@ -359,6 +359,19 @@ var cancelSell = function (id) {
     });
     return deferred.promise;
 }
+var updateOMIDCODE = function (data) {
+
+    console.log("begin sellrecognizer controller updateOMIDCODE ");
+    var deferred = q.defer();
+    var code = sellService.updateOMIDCODE(data);
+    var res = {
+        Data: code,
+        Message: "",
+        Status:1
+    };
+    deferred.resolve(res);
+    return deferred.promise;
+}
 module.exports =
     {
         searchImage: searchImage,
@@ -382,4 +395,5 @@ module.exports =
         cancelSell: cancelSell,
         getProductsByBluetoothCodes: getProductsByBluetoothCodes,
         getDescriptionQRCode: getDescriptionQRCode,
+        updateOMIDCODE: updateOMIDCODE,
     }

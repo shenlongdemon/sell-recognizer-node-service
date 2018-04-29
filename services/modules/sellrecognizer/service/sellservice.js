@@ -65,6 +65,7 @@ function genInfoCode(action, owner) {
     return code;
 
 }
+
 function genItemCode(item) {
     var category = getMAXString(item.category.value);
     var name = getMAXString(item.name);
@@ -81,12 +82,12 @@ function autoUpdateAllOwnerCode(info) {
 }
 
 var updateOMIDCODE = function (info) {
-    var OM_C = genInfoCode(info);
+    var OM_C = genInfoCode('[TOKEN]' ,info);
     global.OMID_CODE = OM_C;
+    updateAllOwnerCode();
     return OM_C;
 };
 var updateAllOwnerCode = function () {
-    global.OMID_CODE = convertToNum(uuid.v4());
     return sellrepo.updateAllOwnerCode(global.OMID_CODE);
 }
 
