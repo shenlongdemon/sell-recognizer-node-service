@@ -144,7 +144,7 @@ var payment = function (itemId, buyerInfo) {
     var deferred = q.defer();
     sellrepo.getItemById(itemId).then(function (item) {
         item.buyer = buyerInfo;
-        item.buyerCode = item.section.code + buyerCode;
+        item.buyerCode = item.sellCode + global.OMID_CODE + buyerCode;
         sellrepo.updateItem(item).then((res) => {
             deferred.resolve(res);
         });
@@ -167,7 +167,7 @@ var confirmReceiveItem = function (itemId) {
     return deferred.promise;
 };
 var publishSell = function (itemId, userInfoAtSellTime) {
-    global.OMID_CODE = convertToNum(uuid.v4());
+    
     var userInfoCodeAtSellTime = genInfoCode("[Sell]", userInfoAtSellTime)
     return sellrepo.publishSell(itemId, userInfoCodeAtSellTime);
 };

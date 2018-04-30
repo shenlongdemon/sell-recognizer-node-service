@@ -265,8 +265,8 @@ var getProductsByCodes = function (names) {
     });
     return deferred.promise;
 }
-var getProductsByBluetoothCodes = function (names) {
-
+var getProductsByBluetoothCodes = function (data) {
+    var names = data.names;
     console.log("begin sellrecognizer controller getProductsByBluetoothCodes " + names.length);
     var deferred = q.defer();
     sellService.getProductsByBluetoothCodes(names).then(function (item) {
