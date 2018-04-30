@@ -25,11 +25,9 @@ function openConnect() {
 function closeDataBase(database) {
     setTimeout(function () {
         database.close(true);
-        console.log("close connect db");
     }, 5000);
 }
 var insertItem = function (item) {
-    console.log('begin repo insertItem', JSON.stringify(item));
 
     var deferred = q.defer();
     openConnect().then(function (database) {
@@ -40,7 +38,6 @@ var insertItem = function (item) {
                 console.log("repo insertItem error when insert " + err);
                 deferred.reject(err);
             } else {
-                console.log('repo insertItem are: ', result);
                 deferred.resolve(item);
             }
             //Close connection
@@ -51,7 +48,6 @@ var insertItem = function (item) {
     return deferred.promise;
 };
 var getItemsBy = function (query, pageNum, pageSize) {
-    console.log('begin repo getItemsBy ', query);
     return getBy(dbConfig.collections.items, query, pageNum, pageSize);
 };
 var getBy = function (collectionName, query, pageNum, pageSize) {
@@ -60,7 +56,6 @@ var getBy = function (collectionName, query, pageNum, pageSize) {
     num = num < 1 ? num = 1 : num = num;
     var size = parseInt(pageSize);
     size = size < 1 ? size = 10000 : size = size;
-    console.log("begin repo get " + collectionName + " with " + JSON.stringify(query) + " pageSize " + size + " pageNum " + pageNum);
 
     openConnect().then(function (database) {
         // Insert some users
@@ -71,7 +66,6 @@ var getBy = function (collectionName, query, pageNum, pageSize) {
                     console.log("repo getItems error when find " + err);
                     deferred.reject(err);
                 } else {
-                    console.log('repo getItem is: ', item);
                     deferred.resolve(item);
                 }
                 //Close connection
@@ -86,7 +80,6 @@ var getBy = function (collectionName, query, pageNum, pageSize) {
                         console.log("repo getItems error when find " + err);
                         deferred.reject(err);
                     } else {
-                        console.log('repo getItems are: ', result);
                         deferred.resolve(result);
                     }
                     //Close connection
@@ -98,25 +91,21 @@ var getBy = function (collectionName, query, pageNum, pageSize) {
     return deferred.promise;
 };
 var getItemById = function (id) {
-    console.log('begin repo getItemById ', id);
     var query = { id: id };
     return getItemsBy(query, 1, 1);
 };
 
 var getItemsByOwnerId = function (ownerId, pageNum, pageSize) {
-    console.log('begin repo getItemsByOwnerId ', ownerId);
     var query = { "owner.id": ownerId };
     return getItemsBy(query, pageNum, pageSize);
 };
 
 var getItems = function (pageNum, pageSize) {
-    console.log('begin repo getItems');
     var query = {};
     return getItemsBy(query, pageNum, pageSize);
 };
 
 var getSelledItems = function (pageNum, pageSize) {
-    console.log('begin repo getItems');
     var query = { $and: [{ sellCode: { $exists: true } }, { sellCode: { $ne: "" } }] };
     return getItemsBy(query, pageNum, pageSize);
 };
@@ -146,7 +135,6 @@ var updateAllOwnerCode = function (OMID_CODE) {
                         item.section.code = item.sellCode + OMID_CODE;
                         item.section.active = true;
                         collection.save(item);
-                        console.log("updateAllOwnerCode update code" + item.section.code);
                     });
 
                     closeDataBase(database);
@@ -169,7 +157,6 @@ var getByItemId = function (id) {
                     item.section.code = item.owner.code + OMID_CODE
                     item.section.active = true;
                     collection.save(item);
-                    console.log("updateAllOwnerCode update " + JSON.stringify(item));
 
                 });
         } catch (e) {
@@ -208,7 +195,6 @@ var updateItem = function (itemToUpdate) {
                 console.log("repo updateItem error when findOne " + err);
                 deferred.reject(err);
             } else {
-                console.log('repo updateItem are: ', item);
                 Object.assign(item, itemToUpdate);
                 var result = collection.save(item);
                 deferred.resolve(item);
@@ -235,7 +221,6 @@ var updateUser = function (userId, userDetail) {
                 console.log("repo updateUser error when findOne " + err);
                 deferred.reject(err);
             } else {
-                console.log('repo updateItem are: ', user);
                 delete userDetail._id;
                 Object.assign(user, userDetail);
                 var result = collection.save(user);
@@ -252,7 +237,6 @@ var updateUser = function (userId, userDetail) {
 
 }
 var publishSell = function (itemId, userInfoCodeAtSellTime) {
-    console.log('begin repo publishSell ' + itemId + " " + userInfoCodeAtSellTime);
     var deferred = q.defer();
     openConnect().then(function (database) {
         var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.items);
@@ -261,7 +245,6 @@ var publishSell = function (itemId, userInfoCodeAtSellTime) {
                 console.log("repo updateUser error when findOne " + err);
                 deferred.reject(err);
             } else {
-                console.log('repo publishSell are: ', item);
                 item.sellCode = item.code + userInfoCodeAtSellTime;
                 item.section.code = item.code + userInfoCodeAtSellTime + global.OMID_CODE;
                 var result = collection.save(item);
@@ -278,7 +261,6 @@ var publishSell = function (itemId, userInfoCodeAtSellTime) {
 }
 
 var login = function (phone, password) {
-    console.log('begin repo login ' + phone + " " + password);
     var deferred = q.defer();
     openConnect().then(function (database) {
         var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.users);
@@ -287,7 +269,6 @@ var login = function (phone, password) {
                 console.log("repo login error when login " + err);
                 deferred.reject(err);
             } else {
-                console.log("repo login error when login " + JSON.stringify(item));
                 deferred.resolve(item);
             }
             database.close(true);
@@ -333,7 +314,6 @@ var getProductsByCategory = function (categoryId, pageNum, pageSize) {
     return getBy(dbConfig.collections.items, query, pageNum, pageSize);
 };
 var cancelSell = function (id) {
-    console.log('begin repo cancelSell ' + id);
     var deferred = q.defer();
     openConnect().then(function (database) {
         var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.items);
@@ -347,7 +327,6 @@ var cancelSell = function (id) {
                     deferred.reject("Your item is sold. You cannot cancel.");
                 }
                 else {
-                    console.log('repo cancelSell are: ', item);
                     item.sellCode = "";
                     var result = collection.save(item);
                     deferred.resolve(item);

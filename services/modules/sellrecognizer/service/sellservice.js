@@ -21,7 +21,6 @@ function convertToNum(string) {
             console.log("convertToNum Error " + e);
         }
     });
-    console.log("convertToNum " + string + " to " + code);
     return code;
 }
 function convertToString(string) {
@@ -41,7 +40,6 @@ function convertToString(string) {
         console.log("convertToString Error " + string + " to " + JSON.stringify(e));
 
     }
-    console.log("convertToString " + string + " to " + code);
     return code;
 }
 function getMAXString(string) {
@@ -55,13 +53,11 @@ function getMAXString(string) {
 }
 
 function genInfoCode(action, owner) {
-    console.log("sellservice genInfoCode " + action + " " + JSON.stringify(owner));
 
     var allStr = " " + action + " " + owner.firstName + " " + owner.lastName + " " + owner.state + " " + owner.zipCode + " " + owner.country
         + "[" + owner.position.coords.latitude + "," + owner.position.coords.longitude + " " + owner.position.coords.altitude + "] "
         + owner.weather.main.temp + "C" + " " + owner.time;
     var code = convertToNum(allStr);
-    console.log("genPersonalCode " + code);
     return code;
 
 }
@@ -72,7 +68,6 @@ function genItemCode(item) {
 
     var allStr = category + " " + name;
     var code = convertToNum(allStr);
-    console.log("genItemCode " + code);
     return code;
 
 }
@@ -135,7 +130,6 @@ var insertItem = function (item) {
     item.buyerCode = "";
     item.sellCode = "";
     item.buyer = undefined;
-    console.log("owner code " + ownerCode + " for " + convertToString(ownerCode));
     return sellrepo.insertItem(item);
 };
 var payment = function (itemId, buyerInfo) {

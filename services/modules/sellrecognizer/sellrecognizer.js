@@ -282,7 +282,6 @@ var getProductsByBluetoothCodes = function (data) {
 }
 var getDescriptionQRCode = function (qrCode) {
 
-    console.log("begin sellrecognizer controller getDescriptionQRCode " + JSON.stringify(qrCode.code));
     var deferred = q.defer();
     sellService.getDescriptionQRCode(qrCode.code).then(function (item) {
         console.log("begin sellrecognizer controller getDescriptionQRCode return " + item);
