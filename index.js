@@ -16,9 +16,9 @@ var app = express();
 app.use(compression({
   filter: function () { return true; }
 }));
-app.use(bodyParser.json()); // support json encoded bodies
-app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
-app.use(bodyParser.json({ limit: '5mb' }));
+
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
 
 
 app.set('port', (process.env.PORT || 5000));
