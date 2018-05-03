@@ -294,7 +294,20 @@ var getDescriptionQRCode = function (qrCode) {
     });
     return deferred.promise;
 }
+var genCode = function (data) {
 
+    var deferred = q.defer();
+    sellService.genCode(data.str).then(function (item) {
+        console.log("begin sellrecognizer controller genCode return " + item);
+        var res = {
+            Data: item,
+            Message: "",
+            Status: item != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
 
 var getProductsByCategory = function (categoryId, pageNum, pageSize) {
     console.log("begin sellrecognizer controller getProductsByCategory " + categoryId);
@@ -395,4 +408,5 @@ module.exports =
         getProductsByBluetoothCodes: getProductsByBluetoothCodes,
         getDescriptionQRCode: getDescriptionQRCode,
         updateOMIDCODE: updateOMIDCODE,
+        genCode: genCode,
     }

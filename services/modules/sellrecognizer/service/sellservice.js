@@ -7,6 +7,26 @@ var lzjs = require('lzjs');
 
 var LZString = require('lz-string');
 var MAX_DIGIT = 8;
+function convertStringToNumWithDescription(str) {
+    var code = "";
+    var description = ""
+    Array.from(str).map((c, key) => {
+
+        _.map(STRS, function (STR, index) {
+            var idx = STR.indexOf(c);
+            if (idx > -1) {
+                code += index + "" + idx;
+                description += c;
+            }
+        });
+
+    });
+    var res = {
+        code: code,
+        str:description
+    }
+    return res;
+}
 function convertToNum(string) {
     var code = "";
     Array.from(string).map((c, key) => {
@@ -87,9 +107,16 @@ var updateOMIDCODE = function (info) {
     };
     return res;
 };
+var genCode = function (str) {
+    var deferred = q.defer();
+
+    var data = convertStringToNumWithDescription(str);
+    deferred.resolve(data);
+    return deferred.promise;
+};
 var updateAllOwnerCode = function () {
     return sellrepo.updateAllOwnerCode(global.OMID_CODE);
-}
+};
 
 
 var updateUser = function (userId, usertoUpdate) {
@@ -161,7 +188,7 @@ var confirmReceiveItem = function (itemId) {
     return deferred.promise;
 };
 var publishSell = function (itemId, userInfoAtSellTime) {
-    
+
     var userInfoCodeAtSellTime = genInfoCode("[Sell]", userInfoAtSellTime)
     return sellrepo.publishSell(itemId, userInfoCodeAtSellTime);
 };
@@ -213,4 +240,5 @@ module.exports =
         cancelSell: cancelSell,
         getProductsByBluetoothCodes: getProductsByBluetoothCodes,
         getDescriptionQRCode: getDescriptionQRCode,
+        genCode: genCode,
     }
