@@ -3,7 +3,6 @@ var sellrepo = require("../repo/mongodb");
 var uuid = require("uuid");
 let STRS = ["0123456789", "abcdefghij", "klmnopqrs", "tuvwxyz", "ABCDEFGHIJ", "KLMNOPQRS", "TUVWXYZ", "-/ _+'.,;:", "[]{}"];
 var _ = require('underscore');
-var lzjs = require('lzjs');
 
 var LZString = require('lz-string');
 var MAX_DIGIT = 8;

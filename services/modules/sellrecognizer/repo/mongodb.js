@@ -340,6 +340,33 @@ var cancelSell = function (id) {
     });
     return deferred.promise;
 };
+var getProjectsByOwnerId = function(ownerId, pageNum, pageSize){
+    var query = {       
+        "owner.id": ownerId
+    };
+    return getBy(dbConfig.collections.projects, query, pageNum, pageSize);
+};
+var insertProject = function (proj) {
+
+    var deferred = q.defer();
+    openConnect().then(function (database) {
+        var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.projects);
+        // Insert some users
+        collection.insert([proj], function (err, result) {
+            if (err) {
+                console.log("repo insertProject error when insert " + err);
+                deferred.reject(err);
+            } else {
+                console.log("repo insertProject DONE");
+                deferred.resolve(proj);
+            }
+            //Close connection
+            database.close(true);
+
+        });
+    });
+    return deferred.promise;
+};
 module.exports =
     {
         insertItem: insertItem,
@@ -360,4 +387,6 @@ module.exports =
         getProductsByCategory: getProductsByCategory,
         cancelSell: cancelSell,
         getProductsByBluetoothCodes:getProductsByBluetoothCodes,
+        getProjectsByOwnerId:getProjectsByOwnerId,
+        insertProject: insertProject,
     }

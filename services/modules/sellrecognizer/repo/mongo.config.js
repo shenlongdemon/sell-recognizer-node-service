@@ -5,7 +5,8 @@ var config = {
     collections: {
         categories: "Categories",
         items: "Items",
-        users: "Users"
+        users: "Users",
+        projects: "Projects"
     }
 };
 module.exports = config;
