@@ -29,7 +29,7 @@ var getTaskCode = function (project, task) {
     var ownerTask = task.owner;
     var allStr = project.name + " " + owner.firstName + " " + owner.lastName + " " + owner.state + " " + owner.zipCode + " " + owner.country
         + "[" + owner.position.coords.latitude + "," + owner.position.coords.longitude + " " + owner.position.coords.altitude + "] "
-        + owner.weather.main.temp + "C" + " " + owner.time;
+        + owner.weather.main.temp + "C" + " " + owner.time + " " + task.name + " " + task.price + " " + task.time + " " + ownerTask.firstName + " " + ownerTask.lastName;
     var data = common.convertStringToNumWithDescription(allStr);
     return data;
 };
@@ -54,21 +54,58 @@ var getProjectTypes = function () {
 var getUserById = function (userId) {
     return ubuilderrepo.getUserById(userId);
 };
-var addTask = function (projectId, task) {   
+var addTask = function (projectId, task) {
     var deferred = q.defer();
     ubuilderrepo.getProjectById(projectId).then(function (project) {
 
-        project.module = project.module || {tasks : []}
+        project.module = project.module || { tasks: [] }
         project.module.tasks = project.module.tasks || []
         task.id = uuid.v4()
-        
-
-
-        item.buyer = buyerInfo;
-        item.buyerCode = item.sellCode + global.OMID_CODE + buyerCode;
-        sellrepo.updateItem(item).then((res) => {
+        var taskCode = getTaskCode(project, task);
+        task.code = taskCode.code;
+        project.module.tasks.push(task);
+        ubuilderrepo.updateProject(project).then((res) => {
             deferred.resolve(res);
         });
+    });
+    return deferred.promise;
+};
+var getProjectById = function (id) {
+    return ubuilderrepo.getProjectById(id);
+};
+var getProjectOrTaskByQRCode = function (code) {
+    var deferred = q.defer();
+    ubuilderrepo.getProjectOrTaskByQRCode(code).then(function (project) {
+        if (project.code == code){
+            var p = {
+                isProjectNotTask: true,
+                project: project
+            };
+            deferred.resolve(p);
+        }
+        else {
+            var task = undefined
+            _.each(project.module.tasks, function(tsk, i){
+                if(tsk.code == code){
+                    task = tsk;
+                    return;
+                }
+            });
+            if (task != undefined){
+                var t = {
+                    isProjectNotTask: false,
+                    task: task,
+                    project: project
+                };
+                deferred.resolve(t);
+            }
+            else {
+                var t = {
+                    isProjectNotTask: false
+                };
+                deferred.resolve(t);
+            }
+        }
     });
     return deferred.promise;
 };
@@ -79,4 +116,6 @@ module.exports =
         getProjectTypes: getProjectTypes,
         getUserById: getUserById,
         addTask: addTask,
+        getProjectById: getProjectById,
+        getProjectOrTaskByQRCode: getProjectOrTaskByQRCode,
     }

@@ -78,6 +78,34 @@ var addTask = function (data) {
     });
     return deferred.promise;
 }
+var getProjectById = function (id) {
+    
+    console.log("begin ubuilder controller getProjectById");
+    var deferred = q.defer();
+    ubuilderService.getProjectById(id).then(function (item) {
+        var res = {
+            Data: item,
+            Message: "",
+            Status: item != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+var getProjectOrTaskByQRCode = function (data) {
+    var code = data.code;
+    console.log("begin ubuilder controller getProjectOrTaskByQRCode");
+    var deferred = q.defer();
+    ubuilderService.getProjectOrTaskByQRCode(code).then(function (item) {
+        var res = {
+            Data: item,
+            Message: "",
+            Status: item != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
 module.exports =
 {
     getProjectsByOwnerId: getProjectsByOwnerId,
@@ -85,4 +113,6 @@ module.exports =
     getProjectTypes:getProjectTypes,
     getUserById:getUserById,
     addTask:addTask,
+    getProjectById:getProjectById,
+    getProjectOrTaskByQRCode:getProjectOrTaskByQRCode,
 }

@@ -388,6 +388,41 @@ var getProjectById = function (id) {
     };
     return getBy(dbConfig.collections.projects, query, 1, 1);
 };
+var updateProject = function (itemToUpdate) {
+    var deferred = q.defer();
+    openConnect().then(function (database) {
+        // Insert some users
+        var collection = database.db(dbConfig.dbname).collection(dbConfig.collections.projects);
+
+        collection.findOne({ id: itemToUpdate.id }).then(function (item, err) {
+            if (err) {
+                console.log("repo updateItem error when findOne " + err);
+                deferred.reject(err);
+            } else {
+                Object.assign(item, itemToUpdate);
+                var result = collection.save(item);
+                deferred.resolve(item);
+
+            }
+            //Close connection
+            closeDataBase(database);
+
+        });
+
+    });
+    return deferred.promise;
+
+}
+var getProjectOrTaskByQRCode = function (code) {
+    var query = {
+        $or: [
+            { code: code },
+            { "module.tasks.code": code }
+        ]
+    };
+    return getBy(dbConfig.collections.projects, query, 1,1);
+
+};
 module.exports =
     {
         insertItem: insertItem,
@@ -414,4 +449,6 @@ module.exports =
         getUserById: getUserById,
         addTask: addTask,
         getProjectById:getProjectById,
+        updateProject:updateProject,
+        getProjectOrTaskByQRCode:getProjectOrTaskByQRCode,
     }
