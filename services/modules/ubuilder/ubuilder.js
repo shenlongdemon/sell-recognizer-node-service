@@ -49,9 +49,40 @@ var getProjectTypes = function () {
     });
     return deferred.promise;
 }
+var getUserById = function (userId) {
+
+    console.log("begin ubuilder controller getUserById");
+    var deferred = q.defer();
+    ubuilderService.getUserById(userId).then(function (item) {
+        var res = {
+            Data: item,
+            Message: "",
+            Status: item != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+var addTask = function (data) {
+    var projectId = data.projectId;
+    var task = data.task;
+    console.log("begin ubuilder controller getUserById");
+    var deferred = q.defer();
+    ubuilderService.addTask(projectId, task).then(function (item) {
+        var res = {
+            Data: item,
+            Message: "",
+            Status: item != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
 module.exports =
 {
     getProjectsByOwnerId: getProjectsByOwnerId,
     insertProject: insertProject,
     getProjectTypes:getProjectTypes,
+    getUserById:getUserById,
+    addTask:addTask,
 }

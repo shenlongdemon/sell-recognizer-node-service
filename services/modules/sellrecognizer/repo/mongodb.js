@@ -345,8 +345,8 @@ var cancelSell = function (id) {
     });
     return deferred.promise;
 };
-var getProjectsByOwnerId = function(ownerId, pageNum, pageSize){
-    var query = {       
+var getProjectsByOwnerId = function (ownerId, pageNum, pageSize) {
+    var query = {
         "owner.id": ownerId
     };
     return getBy(dbConfig.collections.projects, query, pageNum, pageSize);
@@ -372,6 +372,22 @@ var insertProject = function (proj) {
     });
     return deferred.promise;
 };
+var getUserById = function (userId) {
+    var query = {
+        id: userId
+    };
+    return getBy(dbConfig.collections.users, query, 1, 1);
+};
+
+var addTask = function (projectId, task) {
+    return ubuilderrepo.addTask(projectId, task);
+};
+var getProjectById = function (id) {
+    var query = {
+        id: id
+    };
+    return getBy(dbConfig.collections.projects, query, 1, 1);
+};
 module.exports =
     {
         insertItem: insertItem,
@@ -391,8 +407,11 @@ module.exports =
         getProductsByCodes: getProductsByCodes,
         getProductsByCategory: getProductsByCategory,
         cancelSell: cancelSell,
-        getProductsByBluetoothCodes:getProductsByBluetoothCodes,
-        getProjectsByOwnerId:getProjectsByOwnerId,
+        getProductsByBluetoothCodes: getProductsByBluetoothCodes,
+        getProjectsByOwnerId: getProjectsByOwnerId,
         insertProject: insertProject,
-        getProjectTypes:getProjectTypes,
+        getProjectTypes: getProjectTypes,
+        getUserById: getUserById,
+        addTask: addTask,
+        getProjectById:getProjectById,
     }
