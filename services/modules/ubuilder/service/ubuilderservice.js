@@ -8,8 +8,21 @@ var _ = require('underscore');
 
 var LZString = require('lz-string');
 var MAX_DIGIT = 8;
-var genUserInfo = function(user){
-    
+
+var getProjectCode = function (project) {
+    var owner = project.owner;
+    var allStr =  project.type.value + " " + project.name + " " + owner.firstName + " " + owner.lastName + " " + owner.state + " " + owner.zipCode + " " + owner.country
+        + "[" + owner.position.coords.latitude + "," + owner.position.coords.longitude + " " + owner.position.coords.altitude + "] "
+        + owner.weather.main.temp + "C" + " " + owner.time;
+    var data = common.convertStringToNumWithDescription(allStr);
+    return data;
+};
+var getUserCode = function (action, owner) {
+    var allStr = action + " " + owner.firstName + " " + owner.lastName + " " + owner.state + " " + owner.zipCode + " " + owner.country
+        + "[" + owner.position.coords.latitude + "," + owner.position.coords.longitude + " " + owner.position.coords.altitude + "] "
+        + owner.weather.main.temp + "C" + " " + owner.time;
+    var data = common.convertStringToNumWithDescription(allStr);
+    return data;
 };
 var getProjectsByOwnerId = function (ownerId, pageNum, pageSize) {
     return ubuilderrepo.getProjectsByOwnerId(ownerId, pageNum, pageSize);
@@ -19,12 +32,20 @@ var insertProject = function (proj) {
     proj.module = {
         tasks : []
     };
-    var codeData = common.genUserInfo('[OWNER]',proj.owner);
-    proj.owner.code = codeData.code;
+    var projectCode = getProjectCode(proj);
+    proj.code = projectCode.code;
+    var ownerCode = getUserCode("[OWNER]",proj.owner);
+    proj.owner.code = ownerCode.code;
     return ubuilderrepo.insertProject(proj);
 };
+var getProjectTypes = function () {
+   
+    return ubuilderrepo.getProjectTypes();
+};
+
 module.exports =
 {
     getProjectsByOwnerId: getProjectsByOwnerId,
     insertProject: insertProject,
+    getProjectTypes:getProjectTypes,
 }

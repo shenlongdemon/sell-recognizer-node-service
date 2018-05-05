@@ -120,6 +120,11 @@ var getCategories = function () {
     var query = {};
     return getBy(dbConfig.collections.categories, query, 1, 0);
 };
+var getProjectTypes = function () {
+    var query = {};
+    return getBy(dbConfig.collections.projecttypes, query, 1, 0);
+};
+
 var updateAllOwnerCode = function (OMID_CODE) {
     openConnect().then(function (database) {
         // Insert some users
@@ -389,4 +394,5 @@ module.exports =
         getProductsByBluetoothCodes:getProductsByBluetoothCodes,
         getProjectsByOwnerId:getProjectsByOwnerId,
         insertProject: insertProject,
+        getProjectTypes:getProjectTypes,
     }
