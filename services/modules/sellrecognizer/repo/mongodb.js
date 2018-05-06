@@ -423,6 +423,25 @@ var getProjectOrTaskByQRCode = function (code) {
     return getBy(dbConfig.collections.projects, query, 1,1);
 
 };
+var getTasksByOwnerId = function (id, pageNum, pageSize) {
+    var query = 
+            { "module.tasks.owner.id": id };        
+    
+    return getBy(dbConfig.collections.projects, query, pageNum,pageSize);
+
+};
+var getFreeItemsByOwnerId = function (ownerId, pageNum, pageSize) {
+    var query = {
+        $and: [
+            { $where: 'this.sellCode.length == 0' },
+            { 'owner.id': ownerId }
+        ]
+    };  
+    
+    return getBy(dbConfig.collections.items, query, pageNum,pageSize);
+
+};
+
 module.exports =
     {
         insertItem: insertItem,
@@ -451,4 +470,6 @@ module.exports =
         getProjectById:getProjectById,
         updateProject:updateProject,
         getProjectOrTaskByQRCode:getProjectOrTaskByQRCode,
+        getTasksByOwnerId:getTasksByOwnerId,
+        getFreeItemsByOwnerId:getFreeItemsByOwnerId,
     }

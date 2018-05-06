@@ -109,6 +109,13 @@ var getProjectOrTaskByQRCode = function (code) {
     });
     return deferred.promise;
 };
+var getTasksByOwnerId = function (id, pageNum, pageSize) {
+    return ubuilderrepo.getTasksByOwnerId(id, pageNum, pageSize);
+};
+var getFreeItemsByOwnerId = function (ownerId, pageNum, pageSize) {
+    return ubuilderrepo.getFreeItemsByOwnerId(ownerId, pageNum, pageSize);
+};
+
 module.exports =
     {
         getProjectsByOwnerId: getProjectsByOwnerId,
@@ -118,4 +125,6 @@ module.exports =
         addTask: addTask,
         getProjectById: getProjectById,
         getProjectOrTaskByQRCode: getProjectOrTaskByQRCode,
+        getTasksByOwnerId:getTasksByOwnerId,
+        getFreeItemsByOwnerId:getFreeItemsByOwnerId,
     }

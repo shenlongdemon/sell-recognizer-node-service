@@ -106,6 +106,37 @@ var getProjectOrTaskByQRCode = function (data) {
     });
     return deferred.promise;
 }
+var getTasksByOwnerId = function (id, pageNum, pageSize) {
+    console.log("begin ubuilder controller getTasksByOwnerId");
+    var deferred = q.defer();
+    ubuilderService.getTasksByOwnerId(id, pageNum, pageSize).then(function (item) {
+        var res = {
+            Data: item,
+            Message: "",
+            Status: item != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+var getFreeItemsByOwnerId = function (ownerId, pageNum, pageSize) {
+    console.log("begin ubuilder controller getFreeItemsByOwnerId " + ownerId);
+    var deferred = q.defer();   
+
+    ubuilderService.getFreeItemsByOwnerId(ownerId, pageNum, pageSize)
+        .then(function (res) {
+            console.log("ubuilder controller getFreeItemsByOwnerId " + res);
+            var res = {
+                Data: res,
+                Message: "",
+                Status: 1
+            };
+            deferred.resolve(res);
+        }
+        );
+
+    return deferred.promise;
+};
 module.exports =
 {
     getProjectsByOwnerId: getProjectsByOwnerId,
@@ -115,4 +146,6 @@ module.exports =
     addTask:addTask,
     getProjectById:getProjectById,
     getProjectOrTaskByQRCode:getProjectOrTaskByQRCode,
+    getTasksByOwnerId: getTasksByOwnerId,
+    getFreeItemsByOwnerId:getFreeItemsByOwnerId,
 }
