@@ -22,7 +22,7 @@ function openConnect() {
     });
     return deferred.promise;
 }
-function closeDataBase(database) {
+var closeDataBase = function(database) {
     setTimeout(function () {
         database.close(true);
     }, 5000);
@@ -87,6 +87,53 @@ var getBy = function (collectionName, query, pageNum, pageSize) {
 
                 });
         }
+    });
+    return deferred.promise;
+};
+var getSingle = function (collectionName, query) {
+    var deferred = q.defer();
+    openConnect().then(function (database) {
+        // Insert some users
+
+        var collection = database.db(dbConfig.dbname).collection(collectionName);
+
+        collection.findOne(query).then(function (item, err) {
+            if (err) {
+                console.log("repo getItems error when find " + err);
+                deferred.reject(err);
+            } else {
+                deferred.resolve([database, collection, item]);
+            }
+            //Close connection
+            //database.close(true);
+
+        });
+
+    });
+    return deferred.promise;
+};
+var getMulti = function (collectionName, query, pageNum, pageSize) {
+    var deferred = q.defer();
+    var num = parseInt(pageNum);
+    num = num < 1 ? num = 1 : num = num;
+    var size = parseInt(pageSize);
+    size = size < 1 ? size = 10000 : size = size;
+    openConnect().then(function (database) {
+        // Insert some users
+
+        var collection = database.db(dbConfig.dbname).collection(collectionName);
+
+        collection.find(query)
+            .sort({ _id: -1 }).skip((num - 1) * size).limit(size).toArray(function (err, result) {
+                if (err) {
+                    console.log("repo getItems error when find " + err);
+                    deferred.reject(err);
+                } else {
+                    deferred.resolve([database,collection ,result]);
+                }               
+
+            });
+
     });
     return deferred.promise;
 };
@@ -420,28 +467,74 @@ var getProjectOrTaskByQRCode = function (code) {
             { "module.tasks.code": code }
         ]
     };
-    return getBy(dbConfig.collections.projects, query, 1,1);
+    return getBy(dbConfig.collections.projects, query, 1, 1);
 
 };
 var getTasksByOwnerId = function (id, pageNum, pageSize) {
-    var query = 
-            { "module.tasks.owner.id": id };        
-    
-    return getBy(dbConfig.collections.projects, query, pageNum,pageSize);
+    var query =
+        { "module.tasks.owner.id": id };
+
+    return getBy(dbConfig.collections.projects, query, pageNum, pageSize);
 
 };
 var getFreeItemsByOwnerId = function (ownerId, pageNum, pageSize) {
     var query = {
         $and: [
             { $where: 'this.sellCode.length == 0' },
-            { 'owner.id': ownerId }
+            { 'owner.id': ownerId },
+            {
+                $or: [
+                    { use: undefined },
+                    { $where: 'this.use.length == 0' }
+                ]
+            }
         ]
-    };  
-    
-    return getBy(dbConfig.collections.items, query, pageNum,pageSize);
+    };
+
+    return getBy(dbConfig.collections.items, query, pageNum, pageSize);
 
 };
+var makeUsingItem = function (itemId, usingId) {
+    var query = {
+        id: itemId
+    };
+    getSingle(dbConfig.collections.items, query).then(function ([database, collection, item]) {
+        item.use = usingId;
+        collection.save(item);
+        closeDataBase(database);
+    });
+};
+var addItemIntoTask = function (projectId, taskId, item) {
+    var deferred = q.defer();
+    var projQuyery = {
+        id: projectId
+    };
+    getSingle(dbConfig.collections.projects, projQuyery).then(function ([database, collection, project]) {
+        var task = _.find(project.module.tasks, function (t) { return t.id == taskId; });
+        task.material = task.material || {}
+        task.material.items = task.material.items || []
+        task.material.items.push(item);
+        collection.save(project);
 
+        makeUsingItem(item.id, task.id);
+
+
+        deferred.resolve(project);
+
+
+
+        closeDataBase(database)
+
+    });
+    return deferred.promise;
+};
+var doneTask = function (projectId, taskId) {
+
+};
+var getItemsByIds = function(ids){
+    var query = { id: { "$in": ids } };
+    return getMulti(dbConfig.collections.items, query,1,1000);
+};
 module.exports =
     {
         insertItem: insertItem,
@@ -467,9 +560,14 @@ module.exports =
         getProjectTypes: getProjectTypes,
         getUserById: getUserById,
         addTask: addTask,
-        getProjectById:getProjectById,
-        updateProject:updateProject,
-        getProjectOrTaskByQRCode:getProjectOrTaskByQRCode,
-        getTasksByOwnerId:getTasksByOwnerId,
-        getFreeItemsByOwnerId:getFreeItemsByOwnerId,
+        getProjectById: getProjectById,
+        updateProject: updateProject,
+        getProjectOrTaskByQRCode: getProjectOrTaskByQRCode,
+        getTasksByOwnerId: getTasksByOwnerId,
+        getFreeItemsByOwnerId: getFreeItemsByOwnerId,
+        addItemIntoTask: addItemIntoTask,
+        doneTask: doneTask,
+        getSingle: getSingle,
+        getItemsByIds: getItemsByIds,
+        closeDataBase:closeDataBase,
     }

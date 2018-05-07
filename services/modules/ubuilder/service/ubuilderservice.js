@@ -76,7 +76,7 @@ var getProjectById = function (id) {
 var getProjectOrTaskByQRCode = function (code) {
     var deferred = q.defer();
     ubuilderrepo.getProjectOrTaskByQRCode(code).then(function (project) {
-        if (project.code == code){
+        if (project.code == code) {
             var p = {
                 isProjectNotTask: true,
                 project: project
@@ -85,13 +85,13 @@ var getProjectOrTaskByQRCode = function (code) {
         }
         else {
             var task = undefined
-            _.each(project.module.tasks, function(tsk, i){
-                if(tsk.code == code){
+            _.each(project.module.tasks, function (tsk, i) {
+                if (tsk.code == code) {
                     task = tsk;
                     return;
                 }
             });
-            if (task != undefined){
+            if (task != undefined) {
                 var t = {
                     isProjectNotTask: false,
                     task: task,
@@ -115,7 +115,32 @@ var getTasksByOwnerId = function (id, pageNum, pageSize) {
 var getFreeItemsByOwnerId = function (ownerId, pageNum, pageSize) {
     return ubuilderrepo.getFreeItemsByOwnerId(ownerId, pageNum, pageSize);
 };
+var addItemIntoTask = function (projectId, taskId, item) {
+    return ubuilderrepo.addItemIntoTask(projectId, taskId, item);
+};
+var doneTask = function (projectId, taskId) {
 
+    var deferred = q.defer();
+    var pQ = { id: projectId };
+    ubuilderrepo.getProjectById(projectId).then(function (project) {
+        var task = _.find(project.module.tasks, function (t) { return t.id == taskId; });
+        task.done = true;
+        ubuilderrepo.updateProject(project);
+        var itemIds = _.map(task.material.items, function (e, i) {
+            return e.id;
+        });
+        ubuilderrepo.getItemsByIds(itemIds).then(function ([database, collection, items]) {
+            _.each(items, function (e, i) {
+                e.owner = project.owner;
+                common.restartItem("[BUY]",e);
+                collection.save(e);
+            });
+            ubuilderrepo.closeDataBase(database);
+        });
+    });
+
+    return deferred.promise;
+}
 module.exports =
     {
         getProjectsByOwnerId: getProjectsByOwnerId,
@@ -125,6 +150,8 @@ module.exports =
         addTask: addTask,
         getProjectById: getProjectById,
         getProjectOrTaskByQRCode: getProjectOrTaskByQRCode,
-        getTasksByOwnerId:getTasksByOwnerId,
-        getFreeItemsByOwnerId:getFreeItemsByOwnerId,
+        getTasksByOwnerId: getTasksByOwnerId,
+        getFreeItemsByOwnerId: getFreeItemsByOwnerId,
+        addItemIntoTask: addItemIntoTask,
+        doneTask: doneTask,
     }

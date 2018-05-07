@@ -79,7 +79,7 @@ var addTask = function (data) {
     return deferred.promise;
 }
 var getProjectById = function (id) {
-    
+
     console.log("begin ubuilder controller getProjectById");
     var deferred = q.defer();
     ubuilderService.getProjectById(id).then(function (item) {
@@ -121,7 +121,7 @@ var getTasksByOwnerId = function (id, pageNum, pageSize) {
 }
 var getFreeItemsByOwnerId = function (ownerId, pageNum, pageSize) {
     console.log("begin ubuilder controller getFreeItemsByOwnerId " + ownerId);
-    var deferred = q.defer();   
+    var deferred = q.defer();
 
     ubuilderService.getFreeItemsByOwnerId(ownerId, pageNum, pageSize)
         .then(function (res) {
@@ -137,15 +137,57 @@ var getFreeItemsByOwnerId = function (ownerId, pageNum, pageSize) {
 
     return deferred.promise;
 };
+var addItemIntoTask = function (data) {
+
+    var item = data.item;
+    var projectId = data.projectId;
+    var taskId = data.taskId;
+    console.log("begin ubuilder controller addItemIntoTask ");
+    var deferred = q.defer();
+
+    ubuilderService.addItemIntoTask(projectId, taskId, item)
+        .then(function (res) {
+            console.log("ubuilder controller getFreeItemsByOwnerId " + res);
+            var res = {
+                Data: res,
+                Message: "",
+                Status: 1
+            };
+            deferred.resolve(res);
+        }
+        );
+
+    return deferred.promise;
+};
+var doneTask = function (projectId, taskId) {
+    console.log("begin ubuilder controller doneTask ");
+    var deferred = q.defer();
+
+    ubuilderService.doneTask(projectId, taskId)
+        .then(function (res) {
+            console.log("ubuilder controller doneTask " + res);
+            var res = {
+                Data: res,
+                Message: "",
+                Status: 1
+            };
+            deferred.resolve(res);
+        }
+        );
+
+    return deferred.promise;
+};
 module.exports =
-{
-    getProjectsByOwnerId: getProjectsByOwnerId,
-    insertProject: insertProject,
-    getProjectTypes:getProjectTypes,
-    getUserById:getUserById,
-    addTask:addTask,
-    getProjectById:getProjectById,
-    getProjectOrTaskByQRCode:getProjectOrTaskByQRCode,
-    getTasksByOwnerId: getTasksByOwnerId,
-    getFreeItemsByOwnerId:getFreeItemsByOwnerId,
-}
+    {
+        getProjectsByOwnerId: getProjectsByOwnerId,
+        insertProject: insertProject,
+        getProjectTypes: getProjectTypes,
+        getUserById: getUserById,
+        addTask: addTask,
+        getProjectById: getProjectById,
+        getProjectOrTaskByQRCode: getProjectOrTaskByQRCode,
+        getTasksByOwnerId: getTasksByOwnerId,
+        getFreeItemsByOwnerId: getFreeItemsByOwnerId,
+        addItemIntoTask: addItemIntoTask,
+        doneTask: doneTask,
+    }
