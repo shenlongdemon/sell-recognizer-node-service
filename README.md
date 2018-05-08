@@ -5,11 +5,11 @@ run node with command:
 
 with debugger
 ```
-$ node --inspect-brk index.js
+node --inspect-brk index.js
 ``` 
 without debugger
 ```
-$ node index.js
+node index.js
 ``` 
 
 

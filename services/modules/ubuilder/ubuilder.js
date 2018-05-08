@@ -66,7 +66,7 @@ var getUserById = function (userId) {
 var addTask = function (data) {
     var projectId = data.projectId;
     var task = data.task;
-    console.log("begin ubuilder controller getUserById");
+    console.log("begin ubuilder controller addTask");
     var deferred = q.defer();
     ubuilderService.addTask(projectId, task).then(function (item) {
         var res = {
@@ -139,13 +139,13 @@ var getFreeItemsByOwnerId = function (ownerId, pageNum, pageSize) {
 };
 var addItemIntoTask = function (data) {
 
-    var item = data.item;
+    var itemId = data.itemId;
     var projectId = data.projectId;
     var taskId = data.taskId;
     console.log("begin ubuilder controller addItemIntoTask ");
     var deferred = q.defer();
 
-    ubuilderService.addItemIntoTask(projectId, taskId, item)
+    ubuilderService.addItemIntoTask(projectId, taskId, itemId)
         .then(function (res) {
             console.log("ubuilder controller getFreeItemsByOwnerId " + res);
             var res = {
@@ -177,6 +177,24 @@ var doneTask = function (projectId, taskId) {
 
     return deferred.promise;
 };
+var getItemsByTask = function (projectId, taskId) {
+    console.log("begin ubuilder controller getItemsByTask ");
+    var deferred = q.defer();
+
+    ubuilderService.getItemsByTask(projectId, taskId)
+        .then(function (res) {
+            console.log("ubuilder controller getItemsByTask " + res);
+            var res = {
+                Data: res,
+                Message: "",
+                Status: 1
+            };
+            deferred.resolve(res);
+        }
+        );
+
+    return deferred.promise;
+};
 module.exports =
     {
         getProjectsByOwnerId: getProjectsByOwnerId,
@@ -190,4 +208,5 @@ module.exports =
         getFreeItemsByOwnerId: getFreeItemsByOwnerId,
         addItemIntoTask: addItemIntoTask,
         doneTask: doneTask,
+        getItemsByTask:getItemsByTask,
     }

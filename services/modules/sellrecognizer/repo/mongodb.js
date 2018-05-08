@@ -1,7 +1,6 @@
 var mongodb = require('mongodb');
 
 //We need to work with "MongoClient" interface in order to connect to a mongodb server.
-var MongoClient = mongodb.MongoClient;
 var dbConfig = require("./mongo.config");
 // Connection URL. This is where your mongodb server is running.
 var url = 'mongodb://localhost:27017/SellRecognizer';
@@ -10,7 +9,7 @@ var _ = require('underscore');
 
 function openConnect() {
     var deferred = q.defer();
-    MongoClient.connect(dbConfig.url, function (err, database) {
+    mongodb.MongoClient.connect(dbConfig.url, function (err, database) {
         if (err) {
             console.log('repo openConnect Unable to connect to the mongoDB server. Error:', err);
             deferred.reject(err);
@@ -22,7 +21,7 @@ function openConnect() {
     });
     return deferred.promise;
 }
-var closeDataBase = function(database) {
+var closeDataBase = function (database) {
     setTimeout(function () {
         database.close(true);
     }, 5000);
@@ -129,8 +128,8 @@ var getMulti = function (collectionName, query, pageNum, pageSize) {
                     console.log("repo getItems error when find " + err);
                     deferred.reject(err);
                 } else {
-                    deferred.resolve([database,collection ,result]);
-                }               
+                    deferred.resolve([database, collection, result]);
+                }
 
             });
 
@@ -435,7 +434,42 @@ var getProjectById = function (id) {
     };
     return getBy(dbConfig.collections.projects, query, 1, 1);
 };
+var connect = function (dbName, collectionName) {
+    var deferred = q.defer();
+    mongodb.MongoClient.connect(dbConfig.url, function (err, database) {
+        if (err) {
+            console.log('repo openConnect Unable to connect to the mongoDB server. Error:', err);
+            deferred.reject(err);
+        } else {
+            //HURRAY!! We are connected. :)
+            console.log('repo openConnect Connection established to', url);
+            var collection = database.db(dbName).collection(collectionName);
+            deferred.resolve([database, collection]);
+        }
+    });
+    return deferred.promise;
+}
 var updateProject = function (itemToUpdate) {
+    var deferred = q.defer();
+
+    connect(dbConfig.dbname, dbConfig.collections.projects).then(function ([db, collection]) {
+        var Q = {id: itemToUpdate.id};
+        var sets = { $set: itemToUpdate };
+        collection.updateOne(Q, sets, function(err, res) {
+            if (err) deferred.reject(err);
+            else{
+                deferred.resolve(itemToUpdate);
+            }
+            closeDataBase(db);
+          });
+    });
+    return deferred.promise;
+}
+
+
+
+
+var updateProject1 = function (itemToUpdate) {
     var deferred = q.defer();
     openConnect().then(function (database) {
         // Insert some users
@@ -504,7 +538,7 @@ var makeUsingItem = function (itemId, usingId) {
         closeDataBase(database);
     });
 };
-var addItemIntoTask = function (projectId, taskId, item) {
+var addItemIntoTask = function (projectId, taskId, itemId) {
     var deferred = q.defer();
     var projQuyery = {
         id: projectId
@@ -513,10 +547,10 @@ var addItemIntoTask = function (projectId, taskId, item) {
         var task = _.find(project.module.tasks, function (t) { return t.id == taskId; });
         task.material = task.material || {}
         task.material.items = task.material.items || []
-        task.material.items.push(item);
+        task.material.items.push(itemId);
         collection.save(project);
 
-        makeUsingItem(item.id, task.id);
+        makeUsingItem(itemId, task.id);
 
 
         deferred.resolve(project);
@@ -528,12 +562,10 @@ var addItemIntoTask = function (projectId, taskId, item) {
     });
     return deferred.promise;
 };
-var doneTask = function (projectId, taskId) {
 
-};
-var getItemsByIds = function(ids){
+var getItemsByIds = function (ids) {
     var query = { id: { "$in": ids } };
-    return getMulti(dbConfig.collections.items, query,1,1000);
+    return getMulti(dbConfig.collections.items, query, 1, 1000);
 };
 module.exports =
     {
@@ -566,8 +598,7 @@ module.exports =
         getTasksByOwnerId: getTasksByOwnerId,
         getFreeItemsByOwnerId: getFreeItemsByOwnerId,
         addItemIntoTask: addItemIntoTask,
-        doneTask: doneTask,
         getSingle: getSingle,
         getItemsByIds: getItemsByIds,
-        closeDataBase:closeDataBase,
+        closeDataBase: closeDataBase,
     }

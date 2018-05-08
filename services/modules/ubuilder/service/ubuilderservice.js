@@ -63,6 +63,7 @@ var addTask = function (projectId, task) {
         task.id = uuid.v4()
         var taskCode = getTaskCode(project, task);
         task.code = taskCode.code;
+        task.material = {items:[]};
         project.module.tasks.push(task);
         ubuilderrepo.updateProject(project).then((res) => {
             deferred.resolve(res);
@@ -115,8 +116,8 @@ var getTasksByOwnerId = function (id, pageNum, pageSize) {
 var getFreeItemsByOwnerId = function (ownerId, pageNum, pageSize) {
     return ubuilderrepo.getFreeItemsByOwnerId(ownerId, pageNum, pageSize);
 };
-var addItemIntoTask = function (projectId, taskId, item) {
-    return ubuilderrepo.addItemIntoTask(projectId, taskId, item);
+var addItemIntoTask = function (projectId, taskId, itemId) {
+    return ubuilderrepo.addItemIntoTask(projectId, taskId, itemId);
 };
 var doneTask = function (projectId, taskId) {
 
@@ -126,21 +127,44 @@ var doneTask = function (projectId, taskId) {
         var task = _.find(project.module.tasks, function (t) { return t.id == taskId; });
         task.done = true;
         ubuilderrepo.updateProject(project);
-        var itemIds = _.map(task.material.items, function (e, i) {
-            return e.id;
-        });
-        ubuilderrepo.getItemsByIds(itemIds).then(function ([database, collection, items]) {
-            _.each(items, function (e, i) {
-                e.owner = project.owner;
-                common.restartItem("[BUY]",e);
-                collection.save(e);
+        if (task.material.items.length == 0) {
+            deferred.resolve(true);
+        }
+        else {
+            ubuilderrepo.getItemsByIds(task.material.items).then(function ([database, collection, items]) {
+                _.each(items, function (e, i) {
+                    e.owner = project.owner;
+                    common.restartItem("[BUY]", e);
+                    collection.save(e);
+                });
+                ubuilderrepo.closeDataBase(database);
+                deferred.resolve(true);
             });
-            ubuilderrepo.closeDataBase(database);
-        });
+        }
     });
 
     return deferred.promise;
 }
+var getItemsByTask = function (projectId, taskId) {
+
+    var deferred = q.defer();
+    var pQ = { id: projectId };
+    ubuilderrepo.getProjectById(projectId).then(function (project) {
+        var task = _.find(project.module.tasks, function (t) { return t.id == taskId; });
+        if (task.material.items.length == 0) {
+            deferred.resolve([]);
+        }
+        else {
+            ubuilderrepo.getItemsByIds(task.material.items).then(function ([database, collection, items]) {
+                deferred.resolve(items);
+                ubuilderrepo.closeDataBase(database);
+            });
+        }
+    });
+
+    return deferred.promise;
+}
+
 module.exports =
     {
         getProjectsByOwnerId: getProjectsByOwnerId,
@@ -154,4 +178,5 @@ module.exports =
         getFreeItemsByOwnerId: getFreeItemsByOwnerId,
         addItemIntoTask: addItemIntoTask,
         doneTask: doneTask,
+        getItemsByTask: getItemsByTask,
     }
