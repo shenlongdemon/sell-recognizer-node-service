@@ -177,6 +177,25 @@ var doneTask = function (projectId, taskId) {
 
     return deferred.promise;
 };
+var doneProject = function (projectId) {
+    console.log("begin ubuilder controller doneProject ");
+    var deferred = q.defer();
+
+    ubuilderService.doneProject(projectId)
+        .then(function (res) {
+            console.log("ubuilder controller doneProject " + res);
+            var res = {
+                Data: res,
+                Message: "",
+                Status: 1
+            };
+            deferred.resolve(res);
+        }
+        );
+
+    return deferred.promise;
+};
+
 var getItemsByTask = function (projectId, taskId) {
     console.log("begin ubuilder controller getItemsByTask ");
     var deferred = q.defer();
@@ -208,5 +227,6 @@ module.exports =
         getFreeItemsByOwnerId: getFreeItemsByOwnerId,
         addItemIntoTask: addItemIntoTask,
         doneTask: doneTask,
+        doneProject: doneProject,
         getItemsByTask:getItemsByTask,
     }

@@ -462,6 +462,7 @@ var updateProject = function (itemToUpdate) {
             }
             closeDataBase(db);
           });
+          
     });
     return deferred.promise;
 }

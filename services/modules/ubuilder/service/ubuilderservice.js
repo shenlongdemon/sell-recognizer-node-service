@@ -126,7 +126,9 @@ var doneTask = function (projectId, taskId) {
     ubuilderrepo.getProjectById(projectId).then(function (project) {
         var task = _.find(project.module.tasks, function (t) { return t.id == taskId; });
         task.done = true;
-        ubuilderrepo.updateProject(project);
+        task.material = task.material || {}
+        task.material.items = task.material.items || []
+        ubuilderrepo.updateProject(project);       
         if (task.material.items.length == 0) {
             deferred.resolve(true);
         }
@@ -145,12 +147,28 @@ var doneTask = function (projectId, taskId) {
 
     return deferred.promise;
 }
+var doneProject = function (projectId) {
+
+    var deferred = q.defer();
+    var pQ = { id: projectId };
+    ubuilderrepo.getProjectById(projectId).then(function (project) {
+        project.done = true;
+        ubuilderrepo.updateProject(project);        
+        deferred.resolve(true);
+    });
+
+    return deferred.promise;
+}
+
 var getItemsByTask = function (projectId, taskId) {
 
     var deferred = q.defer();
     var pQ = { id: projectId };
     ubuilderrepo.getProjectById(projectId).then(function (project) {
         var task = _.find(project.module.tasks, function (t) { return t.id == taskId; });
+        task.material = task.material || {}
+        task.material.items = task.material.items || []
+
         if (task.material.items.length == 0) {
             deferred.resolve([]);
         }
@@ -178,5 +196,6 @@ module.exports =
         getFreeItemsByOwnerId: getFreeItemsByOwnerId,
         addItemIntoTask: addItemIntoTask,
         doneTask: doneTask,
+        doneProject:doneProject,
         getItemsByTask: getItemsByTask,
     }
