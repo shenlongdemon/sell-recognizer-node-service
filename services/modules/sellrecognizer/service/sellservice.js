@@ -149,7 +149,6 @@ var insertItem = function (item) {
     var itemCode = genItemCode(item);
     var ownerCode = genInfoCode("[Product]", item.owner)
     item.code = itemCode + ownerCode;
-    item.bluetoothCode = uuid.v4();
     item.owner.code = ownerCode;
     item.section = { active: true, code: "", history: [] };
     item.section.history.push(item.owner);
