@@ -22,7 +22,7 @@ function convertStringToNumWithDescription(str) {
     });
     var res = {
         code: code,
-        str:description
+        str: description
     }
     return res;
 }
@@ -85,7 +85,7 @@ function genItemCode(item) {
     var category = getMAXString(item.category.value);
     var name = getMAXString(item.name);
 
-    var allStr = category + " " + name;
+    var allStr = "[ID " + item.id + "]" + category + " " + name;
     var code = convertToNum(allStr);
     return code;
 

@@ -27,9 +27,9 @@ var getUserCode = function (action, owner) {
 var getTaskCode = function (project, task) {
     var owner = project.owner;
     var ownerTask = task.owner;
-    var allStr = project.name + " " + owner.firstName + " " + owner.lastName + " " + owner.state + " " + owner.zipCode + " " + owner.country
+    var allStr = " [ID " + project.id + "] " + project.name + " " + owner.firstName + " " + owner.lastName + " " + owner.state + " " + owner.zipCode + " " + owner.country
         + "[" + owner.position.coords.latitude + "," + owner.position.coords.longitude + " " + owner.position.coords.altitude + "] "
-        + owner.weather.main.temp + "C" + " " + owner.time + " " + task.name + " " + task.price + " " + task.time + " " + ownerTask.firstName + " " + ownerTask.lastName;
+        + owner.weather.main.temp + "C" + " " + owner.time + " [ID " + task.id + "] " + task.name + " " + task.price + " " + task.time + " " + ownerTask.firstName + " " + ownerTask.lastName;
     var data = common.convertStringToNumWithDescription(allStr);
     return data;
 };
@@ -63,7 +63,7 @@ var addTask = function (projectId, task) {
         task.id = uuid.v4()
         var taskCode = getTaskCode(project, task);
         task.code = taskCode.code;
-        task.material = {items:[]};
+        task.material = { items: [] };
         project.module.tasks.push(task);
         ubuilderrepo.updateProject(project).then((res) => {
             deferred.resolve(res);
@@ -128,7 +128,7 @@ var doneTask = function (projectId, taskId) {
         task.done = true;
         task.material = task.material || {}
         task.material.items = task.material.items || []
-        ubuilderrepo.updateProject(project);       
+        ubuilderrepo.updateProject(project);
         if (task.material.items.length == 0) {
             deferred.resolve(true);
         }
@@ -153,7 +153,7 @@ var doneProject = function (projectId) {
     var pQ = { id: projectId };
     ubuilderrepo.getProjectById(projectId).then(function (project) {
         project.done = true;
-        ubuilderrepo.updateProject(project);        
+        ubuilderrepo.updateProject(project);
         deferred.resolve(true);
     });
 
@@ -196,6 +196,6 @@ module.exports =
         getFreeItemsByOwnerId: getFreeItemsByOwnerId,
         addItemIntoTask: addItemIntoTask,
         doneTask: doneTask,
-        doneProject:doneProject,
+        doneProject: doneProject,
         getItemsByTask: getItemsByTask,
     }
