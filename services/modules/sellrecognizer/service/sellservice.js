@@ -148,12 +148,19 @@ var insertItem = function (item) {
     item.id = uuid.v4();
     var itemCode = genItemCode(item);
     var ownerCode = genInfoCode("[Product]", item.owner)
+    var sellWwnerCode = genInfoCode("[Sell]", item.owner)
+
+    
+
     item.code = itemCode + ownerCode;
     item.owner.code = ownerCode;
     item.section = { active: true, code: "", history: [] };
     item.section.history.push(item.owner);
+
+    item.sellCode = item.code + sellWwnerCode;
+    item.section.code = item.code + sellWwnerCode + global.OMID_CODE;
+
     item.buyerCode = "";
-    item.sellCode = "";
     item.buyer = undefined;
     return sellrepo.insertItem(item);
 };
