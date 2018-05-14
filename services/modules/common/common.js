@@ -1,4 +1,4 @@
-
+var geo =  require('spherical-geometry-js');
 var q = require('q');
 var _ = require('underscore');
 var uuid = require("uuid");
@@ -73,8 +73,8 @@ var convertStringToNumWithDescription = function (str) {
     }
     return res;
 };
-var restartItem = function(action, item){
-    
+var restartItem = function (action, item) {
+
     var itemCode = genItemCode(item);
     var ownerCode = genInfoCode(action, item.owner)
     item.code = itemCode + ownerCode;
@@ -88,9 +88,34 @@ var restartItem = function(action, item){
     item.use = "";
 };
 
+var getDegree = function (from, to) {
+    var lat1 = from.lat() * Math.PI / 180;
+    var lat2 = to.lat() * Math.PI / 180;
+    var dLon = (to.lng() - from.lng()) * Math.PI / 180;
+
+    var y = Math.sin(dLon) * Math.cos(lat2);
+    var x = Math.cos(lat1) * Math.sin(lat2) -
+        Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+
+    var brng = Math.atan2(y, x);
+
+    var degree = (((brng * 180 / Math.PI) + 360) % 360);
+    return degree;
+};
+var getTransitivityCoordinate = function (fromCoord, toCoord, distance) {
+    var from = new geo.LatLng(fromCoord.latitude, fromCoord.longitude);
+    var to = new geo.LatLng(toCoord.latitude, toCoord.longitude);
+    var degree = getDegree(from, to);
+
+    var F = new geo.LatLng(from.lat(), from.lng());
+    
+    var A = geo.computeOffset(F, distance, degree);
+    return A;
+};
 module.exports =
     {
         dateLong: dateLong,
         convertStringToNumWithDescription: convertStringToNumWithDescription,
-        restartItem:restartItem,
+        restartItem: restartItem,
+        getTransitivityCoordinate: getTransitivityCoordinate,
     }

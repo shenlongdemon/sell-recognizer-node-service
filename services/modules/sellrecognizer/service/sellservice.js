@@ -3,7 +3,7 @@ var sellrepo = require("../repo/mongodb");
 var uuid = require("uuid");
 let STRS = ["0123456789", "abcdefghij", "klmnopqrs", "tuvwxyz", "ABCDEFGHIJ", "KLMNOPQRS", "TUVWXYZ", "-/ _+'.,;:", "[]{}"];
 var _ = require('underscore');
-
+var comm = require("../../common/common");
 var LZString = require('lz-string');
 var MAX_DIGIT = 8;
 function convertStringToNumWithDescription(str) {
@@ -140,9 +140,26 @@ var getItemBySellSectionId = function (sellSectionId) {
 var getCategories = function () {
     return sellrepo.getCategories();
 };
-var getItemByQRCode = function (qrCode) {
+var getItemByQRCode = function (qrCode, coord) {
+    var deferred = q.defer();
     var qr = qrCode; //lzjs.decompress(qrCode);
-    return sellrepo.getItemByQRCode(qr);
+    sellrepo.getItemByQRCode(qr, coord).then(function (item) {
+        item.location = item.location || { coord: coord };
+        var distanceInMeter = comm.getDistance(coord, item.location.coord);
+        if (distanceInMeter < 50){
+            item.location.coord = coord;
+            item.location.qrCode = item.location.qrCode || coord;
+            item.location.qrCode = coord;
+            sellrepo.updateItem(item);
+        }
+        if (item.sellCode.length > 0){
+            deferred.resolve(item);
+        }
+        else {
+            deferred.reject("Item is not published");
+        }
+    });
+    return deferred.promise;
 };
 var insertItem = function (item) {
     item.id = uuid.v4();
@@ -150,7 +167,7 @@ var insertItem = function (item) {
     var ownerCode = genInfoCode("[Product]", item.owner)
     var sellWwnerCode = genInfoCode("[Sell]", item.owner)
 
-    
+
 
     item.code = itemCode + ownerCode;
     item.owner.code = ownerCode;
@@ -206,8 +223,27 @@ var getItemsByCodes = function (names) {
 var getProductsByCodes = function (names) {
     return sellrepo.getProductsByCodes(names);
 }
-var getProductsByBluetoothCodes = function (names) {
-    return sellrepo.getProductsByBluetoothCodes(names);
+var getProductsByBluetoothCodes = function (devices, coord) {
+    var deferred = q.defer();
+    var names = _.map(devices, function(e,i){ return e.id});
+    sellrepo.getProductsByBluetoothCodes(names, coord).then(function(items){       
+
+        var its = _.filter(items, function(e,i){
+            var device = _.filter(devices, function(de,di){ return de.id == e.bluetoothCode })[0]; 
+            var location = e.location || {coord: e.owner.location.coord};
+            var co = location.coord || e.owner.location.coord;
+            
+            var newCoord = comm.getTransitivityCoordinate(coord, co, device.distance);
+            newCoord.altitude = coord.altitude;
+            e.location.bluetooth = newCoord;
+            e.location.coord = newCoord;
+            sellrepo.updateItem(e);
+
+            return e.sellCode.length > 0;
+        });
+        deferred.resolve(its);
+    });
+    return deferred.promise;
 }
 var getDescriptionQRCode = function (qrCode) {
     var deferred = q.defer();

@@ -169,7 +169,7 @@ var getItemByQRCode = function (qrCode) {
     console.log("begin sellrecognizer controller getItemByQRCode " + qrCode.code);
     var deferred = q.defer();
 
-    sellService.getItemByQRCode(qrCode.code)
+    sellService.getItemByQRCode(qrCode.code, qrCode.coord)
         .then(function (item) {
             console.log("sellrecognizer controller getItemByQRCode " + item);
             var res = {
@@ -266,13 +266,14 @@ var getProductsByCodes = function (names) {
     return deferred.promise;
 }
 var getProductsByBluetoothCodes = function (data) {
-    var names = data.names;
-    console.log("begin sellrecognizer controller getProductsByBluetoothCodes " + names.length);
+    var devices = data.devices;
+    var coord = data.coord;
+    console.log("begin sellrecognizer controller getProductsByBluetoothCodes " + devices.length);
     var deferred = q.defer();
-    sellService.getProductsByBluetoothCodes(names).then(function (item) {
-        console.log("begin sellrecognizer controller getProductsByBluetoothCodes return " + item.length);
+    sellService.getProductsByBluetoothCodes(devices, coord).then(function (items) {
+        console.log("begin sellrecognizer controller getProductsByBluetoothCodes return " + items.length);
         var res = {
-            Data: item,
+            Data: items,
             Message: "",
             Status: item != null ? 1 : 0
         };

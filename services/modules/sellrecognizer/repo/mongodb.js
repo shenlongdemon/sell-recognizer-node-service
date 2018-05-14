@@ -228,7 +228,8 @@ var getItemByQRCode = function (qrCode) {
                     { "section.code": qrCode }
                 ]
             },
-            { $where: 'this.sellCode.length > 0' }
+            //{ $where: 'this.sellCode.length > 0' }
+            { $where: 'this.code.length > 0' }
         ]
 
     };
@@ -342,13 +343,8 @@ var getProductsByCodes = function (names) {
     return getBy(dbConfig.collections.items, query, 1, 0);
 };
 var getProductsByBluetoothCodes = function (names) {
-    var query = {
-        $and: [
-            { bluetoothCode: { "$in": names } },
-            { $where: 'this.sellCode.length > 0' }
-        ]
-
-    };
+    var query = { bluetoothCode: { "$in": names } };
+  
     return getBy(dbConfig.collections.items, query, 1, 0);
 };
 
