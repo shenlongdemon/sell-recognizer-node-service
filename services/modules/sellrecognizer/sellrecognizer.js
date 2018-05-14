@@ -275,7 +275,7 @@ var getProductsByBluetoothCodes = function (data) {
         var res = {
             Data: items,
             Message: "",
-            Status: item != null ? 1 : 0
+            Status: 1
         };
         deferred.resolve(res);
     });

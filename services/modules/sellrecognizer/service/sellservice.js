@@ -74,7 +74,7 @@ function getMAXString(string) {
 function genInfoCode(action, owner) {
 
     var allStr = " " + action + " " + owner.firstName + " " + owner.lastName + " " + owner.state + " " + owner.zipCode + " " + owner.country
-        + "[" + owner.position.coords.latitude + "," + owner.position.coords.longitude + " " + owner.position.coords.altitude + "] "
+        + "[" + owner.position.coord.latitude + "," + owner.position.coord.longitude + " " + owner.position.coord.altitude + "] "
         + owner.weather.main.temp + "C" + " " + owner.time;
     var code = convertToNum(allStr);
     return code;
@@ -144,14 +144,13 @@ var getItemByQRCode = function (qrCode, coord) {
     var deferred = q.defer();
     var qr = qrCode; //lzjs.decompress(qrCode);
     sellrepo.getItemByQRCode(qr, coord).then(function (item) {
-        item.location = item.location || { coord: coord };
-        var distanceInMeter = comm.getDistance(coord, item.location.coord);
-        if (distanceInMeter < 50){
-            item.location.coord = coord;
-            item.location.qrCode = item.location.qrCode || coord;
-            item.location.qrCode = coord;
-            sellrepo.updateItem(item);
-        }
+        // item.location = item.location || { coord: coord };
+        // var distanceInMeter = comm.getDistance(coord, item.location.coord);
+        // if (distanceInMeter < 50){
+        //     item.location.coord = coord;            
+        //     item.location.qrCode = coord;
+        //     sellrepo.updateItem(item);
+        // }
         if (item.sellCode.length > 0){
             deferred.resolve(item);
         }
@@ -179,6 +178,9 @@ var insertItem = function (item) {
 
     item.buyerCode = "";
     item.buyer = undefined;
+    item.location = {
+        coord: item.owner.position.coord
+    };
     return sellrepo.insertItem(item);
 };
 var payment = function (itemId, buyerInfo) {
@@ -230,13 +232,77 @@ var getProductsByBluetoothCodes = function (devices, coord) {
 
         var its = _.filter(items, function(e,i){
             var device = _.filter(devices, function(de,di){ return de.id == e.bluetoothCode })[0]; 
-            var location = e.location || {coord: e.owner.location.coord};
-            var co = location.coord || e.owner.location.coord;
+
+
+            coord.distance = device.distance;
+            coord.id = device.id;
+            coord.ownerId = device.ownerId;
+
+            var ownerCoord = e.owner.position.coord;
+            ownerCoord.distance = device.distance;
+
+            e.location = e.location || {coord: ownerCoord};
+            e.location.coord = e.location.coord || ownerCoord;
+            e.location.coord.distance = device.distance;
+
+            // var co = location.coord || e.owner.position.coord; // 1
+            // co.distance = device.distance
+
+            // var newCoord = comm.getTransitivityCoordinate(coord, co, device.distance); // 2
+            // newCoord.altitude = coord.altitude;
+            // newCoord.distance = device.distance;
+
+            e.location.bluetooth = e.location.bluetooth || [] // 3
+            if (e.location.bluetooth.length < 3){                
+                e.location.bluetooth.push(coord);
+            }
+            else {
+
+                var index = -1;
+                _.forEach(e.location.bluetooth, function(be,bi){
+                    if (be.ownerId == device.ownerId && be.id == device.id){
+                        index = bi;                        
+                    }
+                });
+                if (index > -1){
+                    e.location.bluetooth[index] = coord;
+                }                
+                
+
+                var exactCoord = {};
+
+                var intersectorPoints = []
+                _.forEach(e.location.bluetooth, function(beA,biA){
+                    _.forEach(e.location.bluetooth, function(beB,biB){
+                        var ps = comm.getIntersections(beA.latitude, beA.longitude, beA.distance, beB.latitude, beB.longitude, beB.distance);
+                        if (ps.length > 0){
+                            Array.prototype.push.apply(intersectorPoints, ps);
+                           
+                        }                     
+                    });
+
+                });
+                if(intersectorPoints.length > 1){
+                    var center = comm.getCenter(intersectorPoints);
+                    exactCoord = center;
+                    exactCoord.altitude = coord.altitude;
+                }
+                else if(intersectorPoints.length == 1){
+                    exactCoord = {
+                        latitude: intersectorPoints[0].lat(),
+                        longitude: intersectorPoints[0].lng(),
+                        altitude: coord.altitude
+                    }
+                }
+                else {
+                    exactCoord = coord;
+                }
+
+                e.location.coord = exactCoord;       
+            }
             
-            var newCoord = comm.getTransitivityCoordinate(coord, co, device.distance);
-            newCoord.altitude = coord.altitude;
-            e.location.bluetooth = newCoord;
-            e.location.coord = newCoord;
+            
+            
             sellrepo.updateItem(e);
 
             return e.sellCode.length > 0;

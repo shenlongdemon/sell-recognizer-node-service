@@ -12,14 +12,14 @@ var MAX_DIGIT = 8;
 var getProjectCode = function (project) {
     var owner = project.owner;
     var allStr = project.type.value + " " + project.name + " " + owner.firstName + " " + owner.lastName + " " + owner.state + " " + owner.zipCode + " " + owner.country
-        + "[" + owner.position.coords.latitude + "," + owner.position.coords.longitude + " " + owner.position.coords.altitude + "] "
+        + "[" + owner.position.coord.latitude + "," + owner.position.coord.longitude + " " + owner.position.coord.altitude + "] "
         + owner.weather.main.temp + "C" + " " + owner.time;
     var data = common.convertStringToNumWithDescription(allStr);
     return data;
 };
 var getUserCode = function (action, owner) {
     var allStr = action + " " + owner.firstName + " " + owner.lastName + " " + owner.state + " " + owner.zipCode + " " + owner.country
-        + "[" + owner.position.coords.latitude + "," + owner.position.coords.longitude + " " + owner.position.coords.altitude + "] "
+        + "[" + owner.position.coord.latitude + "," + owner.position.coord.longitude + " " + owner.position.coord.altitude + "] "
         + owner.weather.main.temp + "C" + " " + owner.time;
     var data = common.convertStringToNumWithDescription(allStr);
     return data;
@@ -28,7 +28,7 @@ var getTaskCode = function (project, task) {
     var owner = project.owner;
     var ownerTask = task.owner;
     var allStr = " [ID " + project.id + "] " + project.name + " " + owner.firstName + " " + owner.lastName + " " + owner.state + " " + owner.zipCode + " " + owner.country
-        + "[" + owner.position.coords.latitude + "," + owner.position.coords.longitude + " " + owner.position.coords.altitude + "] "
+        + "[" + owner.position.coord.latitude + "," + owner.position.coord.longitude + " " + owner.position.coord.altitude + "] "
         + owner.weather.main.temp + "C" + " " + owner.time + " [ID " + task.id + "] " + task.name + " " + task.price + " " + task.time + " " + ownerTask.firstName + " " + ownerTask.lastName;
     var data = common.convertStringToNumWithDescription(allStr);
     return data;
