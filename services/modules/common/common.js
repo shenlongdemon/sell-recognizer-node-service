@@ -148,9 +148,9 @@ var getIntersections = function (latA, lngA, rA, latB, lngB, rB) {
         // if (R !== rB) {
         //     return [];
         // }
-        // if (centerA.equals(centerB)) {
-        //     return [];
-        // }
+        if (centerA.equals(centerB)) {
+             return [];
+        }
 
         D = geo.computeDistanceBetween(centerA, centerB); //Distance between the two centres (in meters)
 

@@ -151,7 +151,7 @@ var getItemByQRCode = function (qrCode, coord) {
         //     item.location.qrCode = coord;
         //     sellrepo.updateItem(item);
         // }
-        if (item.sellCode.length > 0){
+        if (item.sellCode.length > 0) {
             deferred.resolve(item);
         }
         else {
@@ -178,9 +178,7 @@ var insertItem = function (item) {
 
     item.buyerCode = "";
     item.buyer = undefined;
-    item.location = {
-        coord: item.owner.position.coord
-    };
+
     return sellrepo.insertItem(item);
 };
 var payment = function (itemId, buyerInfo) {
@@ -225,84 +223,139 @@ var getItemsByCodes = function (names) {
 var getProductsByCodes = function (names) {
     return sellrepo.getProductsByCodes(names);
 }
-var getProductsByBluetoothCodes = function (devices, coord) {
+var getProductsByBluetoothCodes = function (devices) {
     var deferred = q.defer();
-    var names = _.map(devices, function(e,i){ return e.id});
-    sellrepo.getProductsByBluetoothCodes(names, coord).then(function(items){       
+    var names = _.map(devices, function (e, i) { return e.id });
+    sellrepo.getProductsByBluetoothCodes(names).then(function (items) {
 
-        var its = _.filter(items, function(e,i){
-            var device = _.filter(devices, function(de,di){ return de.id == e.bluetoothCode })[0]; 
-
-
-            coord.distance = device.distance;
-            coord.id = device.id;
-            coord.ownerId = device.ownerId;
-
-            var ownerCoord = e.owner.position.coord;
-            ownerCoord.distance = device.distance;
-
-            e.location = e.location || {coord: ownerCoord};
-            e.location.coord = e.location.coord || ownerCoord;
-            e.location.coord.distance = device.distance;
-
-            // var co = location.coord || e.owner.position.coord; // 1
-            // co.distance = device.distance
-
-            // var newCoord = comm.getTransitivityCoordinate(coord, co, device.distance); // 2
-            // newCoord.altitude = coord.altitude;
-            // newCoord.distance = device.distance;
-
-            e.location.bluetooth = e.location.bluetooth || [] // 3
-            if (e.location.bluetooth.length < 3){                
-                e.location.bluetooth.push(coord);
+        var its = _.filter(items, function (e, i) {
+            var device = _.filter(devices, function (de, di) { return de.id == e.bluetoothCode })[0];
+            e.location.bluetooth = e.location.bluetooth || []
+            
+            e.location.bluetooth.push(device);
+            if (e.location.bluetooth.length == 1) {                
+                e.location.coord = device.coord;
             }
             else {
-
-                var index = -1;
-                _.forEach(e.location.bluetooth, function(be,bi){
-                    if (be.ownerId == device.ownerId && be.id == device.id){
-                        index = bi;                        
-                    }
-                });
-                if (index > -1){
-                    e.location.bluetooth[index] = coord;
-                }                
-                
-
                 var exactCoord = {};
-
                 var intersectorPoints = []
-                _.forEach(e.location.bluetooth, function(beA,biA){
-                    _.forEach(e.location.bluetooth, function(beB,biB){
-                        var ps = comm.getIntersections(beA.latitude, beA.longitude, beA.distance, beB.latitude, beB.longitude, beB.distance);
-                        if (ps.length > 0){
-                            Array.prototype.push.apply(intersectorPoints, ps);
-                           
-                        }                     
-                    });
+                _.forEach(e.location.bluetooth, function (beA, biA) {
+                    _.forEach(e.location.bluetooth, function (beB, biB) {
+                        
+                            var ps = comm.getIntersections(beA.coord.latitude, beA.coord.longitude, beA.coord.distance, beB.coord.latitude, beB.coord.longitude, beB.coord.distance);
+                            if (ps.length > 0) {
+                                Array.prototype.push.apply(intersectorPoints, ps);
 
+                            }
+                        
+                    });
                 });
-                if(intersectorPoints.length > 1){
+                if (intersectorPoints.length > 1) {
                     var center = comm.getCenter(intersectorPoints);
                     exactCoord = center;
                     exactCoord.altitude = coord.altitude;
+                    exactCoord.distance = comm.getDistance(center, device.coord);
                 }
-                else if(intersectorPoints.length == 1){
+                else if (intersectorPoints.length == 1) {
                     exactCoord = {
                         latitude: intersectorPoints[0].lat(),
                         longitude: intersectorPoints[0].lng(),
-                        altitude: coord.altitude
+                        altitude: coord.altitude,
+                        distance: 0
                     }
                 }
                 else {
-                    exactCoord = coord;
+                    exactCoord = device.coord;
                 }
-
-                e.location.coord = exactCoord;       
+                e.location.coord =  exactCoord;
             }
-            
-            
-            
+
+
+
+
+            // else {
+
+            // }
+            // var exactCoord = {};
+
+            // var intersectorPoints = []
+            // _.forEach(e.location.bluetooth, function (beA, biA) {
+            //     _.forEach(e.location.bluetooth, function (beB, biB) {
+            //         if (beA.ownerId != beB.ownerId) {
+            //             var ps = comm.getIntersections(beA.coord.latitude, beA.coord.longitude, beA.coord.distance, beB.coord.latitude, beB.coord.longitude, beB.coord.distance);
+            //             if (ps.length > 0) {
+            //                 Array.prototype.push.apply(intersectorPoints, ps);
+
+            //             }
+            //         }
+            //     });
+            // });
+
+            // coord.distance = device.distance;
+            // coord.id = device.id;
+            // coord.ownerId = device.ownerId;
+
+            // var ownerCoord = e.owner.position.coord;
+            // ownerCoord.distance = device.distance;
+
+            // e.location = e.location || { coord: ownerCoord };
+            // e.location.coord = e.location.coord || ownerCoord;
+            // e.location.coord.distance = device.distance;
+            // e.location.bluetooth = e.location.bluetooth || [] // 3
+
+            // var index = -1;
+            // _.forEach(e.location.bluetooth, function (be, bi) {
+            //     if (be.ownerId == device.ownerId && be.id == device.id) {
+            //         index = bi;
+            //     }
+            // });
+            // if (index > -1) {
+            //     e.location.bluetooth[index] = coord;
+            // }
+            // else {
+            //     e.location.bluetooth.push(coord);
+            // }
+
+            // var exactCoord = {};
+
+            // var intersectorPoints = []
+            // _.forEach(e.location.bluetooth, function (beA, biA) {
+            //     _.forEach(e.location.bluetooth, function (beB, biB) {
+            //         if (beA.id != beB.id) {
+            //             var ps = comm.getIntersections(beA.latitude, beA.longitude, beA.distance, beB.latitude, beB.longitude, beB.distance);
+            //             if (ps.length > 0) {
+            //                 Array.prototype.push.apply(intersectorPoints, ps);
+
+            //             }
+            //         }
+            //     });
+
+            // });
+            // if (intersectorPoints.length > 1) {
+            //     var center = comm.getCenter(intersectorPoints);
+            //     exactCoord = center;
+            //     exactCoord.altitude = coord.altitude;
+            //     exactCoord.id = device.id;
+            //     exactCoord.ownerId = device.ownerId;
+            // }
+            // else if (intersectorPoints.length == 1) {
+            //     exactCoord = {
+            //         latitude: intersectorPoints[0].lat(),
+            //         longitude: intersectorPoints[0].lng(),
+            //         altitude: coord.altitude,
+            //         id: device.id,
+            //         ownerId: device.ownerId
+            //     }
+            // }
+            // else {
+            //     exactCoord = coord;
+            // }
+
+            // e.location.coord = exactCoord;
+
+
+
+
             sellrepo.updateItem(e);
 
             return e.sellCode.length > 0;
