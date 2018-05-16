@@ -372,6 +372,27 @@ var cancelSell = function (id) {
     });
     return deferred.promise;
 }
+var getStores = function () {
+
+    console.log("begin sellrecognizer controller getStores ");
+    var deferred = q.defer();
+    sellService.getStores().then(function (items) {
+        var res = {
+            Data: items,
+            Message: "",
+            Status: 1
+        };
+        deferred.resolve(res);
+    }).catch((ex) => {
+        var res = {
+            Data: ex,
+            Message: ex.Message,
+            Status: 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
 var updateOMIDCODE = function (data) {
 
     console.log("begin sellrecognizer controller updateOMIDCODE ");
@@ -410,4 +431,5 @@ module.exports =
         getDescriptionQRCode: getDescriptionQRCode,
         updateOMIDCODE: updateOMIDCODE,
         genCode: genCode,
+        getStores: getStores,
     }

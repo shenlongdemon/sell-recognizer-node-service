@@ -564,6 +564,14 @@ var getItemsByIds = function (ids) {
     var query = { id: { "$in": ids } };
     return getMulti(dbConfig.collections.items, query, 1, 1000);
 };
+var getStores = function () {
+    var query = {  };
+    var deferred = q.defer();
+    getMulti(dbConfig.collections.stores, query, 1, 1000).then(function ([database, collection, items]) {
+        deferred.resolve(items);
+    });
+    return deferred.promise;
+};
 module.exports =
     {
         insertItem: insertItem,
@@ -598,4 +606,5 @@ module.exports =
         getSingle: getSingle,
         getItemsByIds: getItemsByIds,
         closeDataBase: closeDataBase,
+        getStores:getStores,
     }

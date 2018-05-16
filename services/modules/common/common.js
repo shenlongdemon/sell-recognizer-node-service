@@ -1,4 +1,5 @@
 var geo = require('spherical-geometry-js');
+var geolib  = require('geolib');
 var q = require('q');
 var _ = require('underscore');
 var uuid = require("uuid");
@@ -56,29 +57,22 @@ var area = function (coord) {
 
     return area;
 };
-var getCenter = function (coord) {
-    var x = 0,
-            y = 0,
-            i,
-            j,
-            f,
-            point1,
-            point2;
-
-        for (i = 0, j = coord.length - 1; i < coord.length; j=i,i++) {
-            point1 = coord[i];
-            point2 = coord[j];
-            f = point1.lat() * point2.lng() - point2.lat() * point1.lng();
-            x += (point1.lat() + point2.lat()) * f;
-            y += (point1.lng() + point2.lng()) * f;
-        }
-
-        f = area(coord) * 6;
-        var res = {
-            latitude: x / f,
-            longitude: y / f
+var getCenter = function (coords) {
+    var latlngs = [];
+    var i = 0;
+     for (i=0; i<coords.length; i++) {
+        var coord = {
+            latitude: coords[i].lat(),
+            longitude: coords[i].lng()
         };
-        return res;
+        latlngs.push(coord);
+     }
+     var center = geolib.getCenter(latlngs );
+     var coord = {
+        latitude: parseFloat(center.latitude),
+        longitude: parseFloat(center.longitude)
+    };
+     return coord;
 }
 // function returnIntersectionArea(point1, point2, point3, r1, r2, r3) {
 
