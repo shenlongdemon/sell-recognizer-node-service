@@ -236,6 +236,7 @@ var getProductsByBluetoothCodes = function (devices) {
                 return; false;
             }
             device = dvs[0];
+            e.bluetooth = device;
             e.location.bluetooth = e.location.bluetooth || []
             
             e.location.bluetooth.push(device);
