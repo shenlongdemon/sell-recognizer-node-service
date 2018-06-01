@@ -8,7 +8,7 @@ var config = {
         users: "Users",
         projects: "Projects",
         projecttypes:"ProjectType",
-        stores:'Store'
+        stores:'Stores'
     }
 };
 module.exports = config;

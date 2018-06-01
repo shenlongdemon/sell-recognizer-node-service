@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html ng-app="app">
+    <head>
+        <title>{{$root.title}}</title>
+        <meta http-equiv="Access-Control-Allow-Origin" content="*" />
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <link href="contents/images/favicon.ico" rel="shortcut icon" type="image/png"/>
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+        <script src="https://www.gstatic.com/firebasejs/3.9.0/firebase.js"></script>
+		<!-- jQuery -->
+        <script src="scripts/jquery/jquery-2.1.4.js"></script>
+        <script src="scripts/jquery/jquery-ui.min.js"></script> 
+        <!-- Angular -->
+        <script src="scripts/angular/angular.js"></script>
+
+        <script src="scripts/angular/angular-route.js"></script>
+        <script src="scripts/angular/angular-ui-router.min.js"></script>
+        <script src="scripts/angular/angular-cookies.js"></script>
+        <script src="scripts/angular/angular-animate.min.js"></script>        
+        <script src="scripts/angular/ngStorage.min.js"></script>
+        <!-- loading-bar -->
+        <link href="scripts/loading-bar/loading-bar.css" type="text/css" rel="stylesheet" />
+        <link href="scripts/loading-bar/angular-loading.css" type="text/css" rel="stylesheet" />
+        <script src="scripts/loading-bar/loading-bar.js"></script>        
+        <script src="scripts/loading-bar/angular-loading.min.js"></script>
+        <script src="scripts/others/spin.min.js"></script>
+        <script src="scripts/others/xml2json.js"></script>
+        
+        <!-- bootstrap -->       
+        <link href="scripts/bootstrap/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <script src="scripts/bootstrap/bootstrap/js/bootstrap.min.js"></script>        
+        <script src="scripts/bootstrap/ui-bootstrap-tpls-2.0.0.min.js"></script>   
+        <!-- others --> 
+        <script src="scripts/others/lz-string.js"></script>   
+        <!-- Static modules -->
+        <script src="app.js"></script>        
+        <script src="home/home.controller.js"></script>
+        <script src="home/home.service.js"></script>
+        <!-- Module -->  
+        
+        <script src="modules/test/controller/test-index.controller.js"></script>
+        <script src="modules/test/controller/test-page.controller.js"></script>        
+        <script src="modules/test/service/test.service.js"></script>
+        <script src="modules/test/function/TestFunc.js"></script>      
+	<style>   
+            html, body, #wrapper,.view-animate  {
+              height: 100%;
+              margin: 0;
+              padding: 0;
+            }
+        </style>
+    </head>
+    <body>
+    
+        <div id="wrapper">
+            <div ng-view class="view-animate"></div>
+        </div>        
+    </body>
+</html>

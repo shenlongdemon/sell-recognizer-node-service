@@ -220,27 +220,31 @@ var login = function (phone, password) {
 var getItemsByCodes = function (names) {
     return sellrepo.getItemsByCodes(names);
 }
+var getItemsById = function (id) {
+    return sellrepo.getItemsById(id);
+}
+
 var getProductsByCodes = function (names) {
     return sellrepo.getProductsByCodes(names);
 }
 var getProductsByBluetoothCodes = function (devices) {
     var deferred = q.defer();
     var bluetoothCodes = _.map(devices, function (e, i) { return e.id });
-    
+
     sellrepo.getProductsByBluetoothCodes(bluetoothCodes).then(function (items) {
         var resItems = [];
         _.forEach(items, function (e, i) {
             var dvs = _.filter(devices, function (de, di) { return de.id == e.bluetoothCode });
             var device = undefined;
-            if (dvs.length == 0){
+            if (dvs.length == 0) {
                 return; false;
             }
             device = dvs[0];
             e.bluetooth = device;
             e.location.bluetooth = e.location.bluetooth || []
-            
+
             e.location.bluetooth.push(device);
-            if (e.location.bluetooth.length == 1) {                
+            if (e.location.bluetooth.length == 1) {
                 e.location.coord = device.coord;
             }
             else {
@@ -248,13 +252,13 @@ var getProductsByBluetoothCodes = function (devices) {
                 var intersectorPoints = []
                 _.forEach(e.location.bluetooth, function (beA, biA) {
                     _.forEach(e.location.bluetooth, function (beB, biB) {
-                        
-                            var ps = comm.getIntersections(beA.coord.latitude, beA.coord.longitude, beA.coord.distance, beB.coord.latitude, beB.coord.longitude, beB.coord.distance);
-                            if (ps.length > 0) {
-                                Array.prototype.push.apply(intersectorPoints, ps);
 
-                            }
-                        
+                        var ps = comm.getIntersections(beA.coord.latitude, beA.coord.longitude, beA.coord.distance, beB.coord.latitude, beB.coord.longitude, beB.coord.distance);
+                        if (ps.length > 0) {
+                            Array.prototype.push.apply(intersectorPoints, ps);
+
+                        }
+
                     });
                 });
                 if (intersectorPoints.length > 1) {
@@ -274,14 +278,14 @@ var getProductsByBluetoothCodes = function (devices) {
                 else {
                     exactCoord = device.coord;
                 }
-                e.location.coord =  exactCoord;
+                e.location.coord = exactCoord;
             }
-            if (e.location.bluetooth.length > 3) {                
+            if (e.location.bluetooth.length > 3) {
                 e.location.bluetooth.shift();
             }
             sellrepo.updateItem(e);
 
-            if (e.sellCode.length > 0){
+            if (e.sellCode.length > 0) {
                 resItems.push(e);
             }
         });
@@ -304,6 +308,15 @@ var cancelSell = function (id) {
 }
 var getStores = function () {
     return sellrepo.getStores();
+}
+var saveStorePosition = function (stores) {
+    return sellrepo.saveStorePosition(stores);
+}
+var getItemInsideStore = function (storeId, position) {
+    return sellrepo.getItemInsideStore(storeId, position);
+}
+var getItemInsideStore = function (storeId, position) {
+    return sellrepo.getItemInsideStore(storeId, position);
 }
 module.exports =
     {
@@ -329,5 +342,7 @@ module.exports =
         getProductsByBluetoothCodes: getProductsByBluetoothCodes,
         getDescriptionQRCode: getDescriptionQRCode,
         genCode: genCode,
-        getStores:getStores,
+        getStores: getStores,
+        saveStorePosition: saveStorePosition,
+        getItemInsideStore: getItemInsideStore,
     }

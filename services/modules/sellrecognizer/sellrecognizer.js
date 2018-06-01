@@ -84,7 +84,7 @@ var getItemsByOwnerId = function (ownerId, pageNum, pageSize) {
     return deferred.promise;
 };
 var getItems = function (pageNum, pageSize) {
-    console.log("begin sellrecognizer controller getItems ");
+    console.log("begin sellrecognizer controller getItems pageNum " + pageNum + " pageSize " + pageSize);
     var deferred = q.defer();
     var num = parseInt(pageNum);
     num = num < 1 ? num = 1 : num = num;
@@ -93,7 +93,7 @@ var getItems = function (pageNum, pageSize) {
 
     sellService.getItems(num, size)
         .then(function (res) {
-            console.log("sellrecognizer controller getItems " + res);
+            console.log("sellrecognizer controller getItems " + res.length);
             var res = {
                 Data: res,
                 Message: "",
@@ -393,6 +393,27 @@ var getStores = function () {
     });
     return deferred.promise;
 }
+var saveStorePosition = function (stores) {
+    console.log("begin sellrecognizer controller saveStorePosition " + stores.length);
+    var deferred = q.defer();
+    sellService.saveStorePosition(stores).then(function (re) {
+        var res = {
+            Data: re,
+            Message: "",
+            Status: 1
+        };
+        deferred.resolve(res);
+    }).catch((ex) => {
+        var res = {
+            Data: ex,
+            Message: ex.Message,
+            Status: 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+
 var updateOMIDCODE = function (data) {
 
     console.log("begin sellrecognizer controller updateOMIDCODE ");
@@ -406,6 +427,28 @@ var updateOMIDCODE = function (data) {
     deferred.resolve(res);
     return deferred.promise;
 }
+var getItemInsideStore = function (storeId, position) {
+
+    console.log("begin sellrecognizer controller getItemInsideStore storeId " + storeId + " position " + position);
+    var deferred = q.defer();
+    sellService.getItemInsideStore(storeId, position).then(function (re) {
+        var res = {
+            Data: re,
+            Message: "",
+            Status: 1
+        };
+        deferred.resolve(res);
+    }).catch((ex) => {
+        var res = {
+            Data: ex,
+            Message: ex.Message,
+            Status: 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+
 module.exports =
     {
         searchImage: searchImage,
@@ -432,4 +475,6 @@ module.exports =
         updateOMIDCODE: updateOMIDCODE,
         genCode: genCode,
         getStores: getStores,
+        saveStorePosition:saveStorePosition,
+        getItemInsideStore:getItemInsideStore,
     }

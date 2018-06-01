@@ -136,6 +136,29 @@ var getMulti = function (collectionName, query, pageNum, pageSize) {
     });
     return deferred.promise;
 };
+var getAll = function (collectionName, query, pageNum, pageSize) {
+    var deferred = q.defer();
+    var num = parseInt(pageNum);
+    num = num < 1 ? num = 1 : num = num;
+    var size = parseInt(pageSize);
+    size = size < 1 ? size = 10000 : size = size;
+    openConnect().then(function (database) {
+        var collection = database.db(dbConfig.dbname).collection(collectionName);
+        collection.find(query)
+            .sort({ _id: -1 }).skip((num - 1) * size).limit(size).toArray(function (err, result) {
+                if (err) {
+                    console.log("repo getAll error when find " + err);
+                    deferred.reject(err);
+                } else {
+                    console.log("repo getAll " + collectionName + "  " + result.length);
+                    deferred.resolve(result);
+                }
+                database.close(true);
+            });
+
+    });
+    return deferred.promise;
+};
 var getItemById = function (id) {
     var query = { id: id };
     return getItemsBy(query, 1, 1);
@@ -148,7 +171,7 @@ var getItemsByOwnerId = function (ownerId, pageNum, pageSize) {
 
 var getItems = function (pageNum, pageSize) {
     var query = {};
-    return getItemsBy(query, pageNum, pageSize);
+    return getAll(dbConfig.collections.items, query, pageNum, pageSize);
 };
 
 var getSelledItems = function (pageNum, pageSize) {
@@ -344,7 +367,7 @@ var getProductsByCodes = function (names) {
 };
 var getProductsByBluetoothCodes = function (names) {
     var query = { bluetoothCode: { "$in": names } };
-  
+
     return getBy(dbConfig.collections.items, query, 1, 0);
 };
 
@@ -449,16 +472,16 @@ var updateProject = function (itemToUpdate) {
     var deferred = q.defer();
 
     connect(dbConfig.dbname, dbConfig.collections.projects).then(function ([db, collection]) {
-        var Q = {id: itemToUpdate.id};
+        var Q = { id: itemToUpdate.id };
         var sets = { $set: itemToUpdate };
-        collection.updateOne(Q, sets, function(err, res) {
+        collection.updateOne(Q, sets, function (err, res) {
             if (err) deferred.reject(err);
-            else{
+            else {
                 deferred.resolve(itemToUpdate);
             }
             closeDataBase(db);
-          });
-          
+        });
+
     });
     return deferred.promise;
 }
@@ -565,13 +588,41 @@ var getItemsByIds = function (ids) {
     return getMulti(dbConfig.collections.items, query, 1, 1000);
 };
 var getStores = function () {
-    var query = {  };
+    var query = {};
     var deferred = q.defer();
     getMulti(dbConfig.collections.stores, query, 1, 1000).then(function ([database, collection, items]) {
         deferred.resolve(items);
     });
     return deferred.promise;
 };
+var saveStorePosition = function (stores) {
+    var deferred = q.defer();
+
+    connect(dbConfig.dbname, dbConfig.collections.stores).then(function ([db, collection]) {
+        var i = 0;
+        _.forEach(stores, function (e, i) {
+            var Q = { id: e.id };
+            delete e._id;
+            delete e.name;
+            var sets = { $set: e };
+            collection.updateOne(Q, sets, function (err, res) {
+                if (err) deferred.reject(err);
+                else {
+                    //deferred.resolve(itemToUpdate);
+                }  
+                i += 1;
+                if (i == stores.length){
+                    deferred.resolve(true);
+                    closeDataBase(db);
+                }              
+            });
+        });
+        
+
+    });
+    return deferred.promise;
+};
+getItemInsideStore
 module.exports =
     {
         insertItem: insertItem,
@@ -606,5 +657,6 @@ module.exports =
         getSingle: getSingle,
         getItemsByIds: getItemsByIds,
         closeDataBase: closeDataBase,
-        getStores:getStores,
+        getStores: getStores,
+        saveStorePosition: saveStorePosition,
     }

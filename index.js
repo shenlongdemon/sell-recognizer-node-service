@@ -23,7 +23,7 @@ app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:500
 
 app.set('port', (process.env.PORT || 5000));
 
-app.use(express.static(__dirname + '/static'));
+app.use(express.static(__dirname + '/static/portal'));
 
 app.get("/", function (req, res){
 	res.sendFile("/index.html");
