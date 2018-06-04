@@ -393,6 +393,28 @@ var getStores = function () {
     });
     return deferred.promise;
 }
+var getStoreById = function (id) {
+
+    console.log("begin sellrecognizer controller getStoreById " + id);
+    var deferred = q.defer();
+    sellService.getStoreById(id).then(function (store) {
+        var res = {
+            Data: store,
+            Message: "",
+            Status: 1
+        };
+        deferred.resolve(res);
+    }).catch((ex) => {
+        var res = {
+            Data: ex,
+            Message: ex.Message,
+            Status: 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+
 var saveStorePosition = function (stores) {
     console.log("begin sellrecognizer controller saveStorePosition " + stores.length);
     var deferred = q.defer();
@@ -413,7 +435,26 @@ var saveStorePosition = function (stores) {
     });
     return deferred.promise;
 }
-
+var saveItems = function (items) {
+    console.log("begin sellrecognizer controller saveItems " + items.length);
+    var deferred = q.defer();
+    sellService.saveItems(items).then(function (re) {
+        var res = {
+            Data: re,
+            Message: "",
+            Status: 1
+        };
+        deferred.resolve(res);
+    }).catch((ex) => {
+        var res = {
+            Data: ex,
+            Message: ex.Message,
+            Status: 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
 var updateOMIDCODE = function (data) {
 
     console.log("begin sellrecognizer controller updateOMIDCODE ");
@@ -475,6 +516,9 @@ module.exports =
         updateOMIDCODE: updateOMIDCODE,
         genCode: genCode,
         getStores: getStores,
+        getStoreById: getStoreById,
         saveStorePosition:saveStorePosition,
         getItemInsideStore:getItemInsideStore,
+        saveItems:saveItems,
+
     }

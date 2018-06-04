@@ -315,9 +315,13 @@ var saveStorePosition = function (stores) {
 var getItemInsideStore = function (storeId, position) {
     return sellrepo.getItemInsideStore(storeId, position);
 }
-var getItemInsideStore = function (storeId, position) {
-    return sellrepo.getItemInsideStore(storeId, position);
+var saveItems = function (items) {
+    return sellrepo.saveItems(items);
 }
+var getStoreById = function (id) {
+    return sellrepo.getStoreById(id);
+}
+
 module.exports =
     {
         insertItem: insertItem,
@@ -345,4 +349,6 @@ module.exports =
         getStores: getStores,
         saveStorePosition: saveStorePosition,
         getItemInsideStore: getItemInsideStore,
+        saveItems:saveItems,
+        getStoreById:getStoreById,
     }

@@ -163,7 +163,10 @@ var getItemById = function (id) {
     var query = { id: id };
     return getItemsBy(query, 1, 1);
 };
-
+var getStoreById = function (id) {
+    var query = { id: id };
+    return getBy(dbConfig.collections.stores, query, 1, 1);
+};
 var getItemsByOwnerId = function (ownerId, pageNum, pageSize) {
     var query = { "owner.id": ownerId };
     return getItemsBy(query, pageNum, pageSize);
@@ -617,12 +620,51 @@ var saveStorePosition = function (stores) {
                 }              
             });
         });
-        
-
     });
     return deferred.promise;
 };
-getItemInsideStore
+var saveItems = function (items) {
+    var deferred = q.defer();
+
+    connect(dbConfig.dbname, dbConfig.collections.items).then(function ([db, collection]) {
+        var i = 0;
+        _.forEach(items, function (e, i) {
+            var Q = { id: e.id };
+            delete e._id;
+            var sets = { $set: e };
+            collection.updateOne(Q, sets, function (err, res) {
+                if (err) deferred.reject(err);
+                else {
+                    //deferred.resolve(itemToUpdate);
+                }  
+                i += 1;
+                if (i == items.length){
+                    deferred.resolve(true);
+                    closeDataBase(db);
+                }              
+            });
+        });
+    });
+    return deferred.promise;
+};
+var getItemInsideStore = function (storeId, position) {
+    var deferred = q.defer();
+    var query = {id: storeId };
+
+    getBy(dbConfig.collections.stores, query, 1, 1).then(function(store){
+        var itemsInStore = _.filter(store.items, function(i){
+            return i.position == position;
+        });
+        if (itemsInStore.length > 0){
+            var itemInStore = itemsInStore[0];
+            var itemQuery = {id: itemInStore.id };
+            getBy(dbConfig.collections.items, itemQuery, 1, 1).then(function(item){
+                deferred.resolve(item);
+            });
+        }
+    });
+    return deferred.promise;
+}
 module.exports =
     {
         insertItem: insertItem,
@@ -659,4 +701,7 @@ module.exports =
         closeDataBase: closeDataBase,
         getStores: getStores,
         saveStorePosition: saveStorePosition,
+        getItemInsideStore:getItemInsideStore,
+        saveItems:saveItems,
+        getStoreById:getStoreById,
     }

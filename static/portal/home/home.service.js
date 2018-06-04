@@ -20,6 +20,11 @@
             var api = Constants.API_BASE.replace("{service}", SELLREG_SERVICE).replace("{action}", "saveStorePosition");
             return $http.post(api, store);
         }
+        service.saveItems = function (items) {
+            var api = Constants.API_BASE.replace("{service}", SELLREG_SERVICE).replace("{action}", "saveItems");
+            return $http.post(api, items);
+        }
+        
         return service;
 
     }
