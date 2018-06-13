@@ -321,6 +321,9 @@ var saveItems = function (items) {
 var getStoreById = function (id) {
     return sellrepo.getStoreById(id);
 }
+var getStoreContainItem = function (itemId) {
+    return sellrepo.getStoreContainItem(itemId);
+}
 
 module.exports =
     {
@@ -351,4 +354,5 @@ module.exports =
         getItemInsideStore: getItemInsideStore,
         saveItems:saveItems,
         getStoreById:getStoreById,
+        getStoreContainItem:getStoreContainItem,
     }

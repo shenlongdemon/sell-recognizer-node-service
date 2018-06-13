@@ -386,6 +386,14 @@ var getProductsByCategory = function (categoryId, pageNum, pageSize) {
     };
     return getBy(dbConfig.collections.items, query, pageNum, pageSize);
 };
+var getStoreContainItem = function (itemId) {
+    var query = { "items": { $elemMatch: { id: itemId}} };
+
+    
+    return getBy(dbConfig.collections.stores, query, 1, 1);
+};
+
+
 var cancelSell = function (id) {
     var deferred = q.defer();
     openConnect().then(function (database) {
@@ -665,6 +673,7 @@ var getItemInsideStore = function (storeId, position) {
     });
     return deferred.promise;
 }
+
 module.exports =
     {
         insertItem: insertItem,
@@ -704,4 +713,5 @@ module.exports =
         getItemInsideStore:getItemInsideStore,
         saveItems:saveItems,
         getStoreById:getStoreById,
+        getStoreContainItem:getStoreContainItem,
     }
