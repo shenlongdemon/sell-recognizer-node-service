@@ -7,7 +7,7 @@ var q = require('q');
 var _ = require('underscore');
 var sellService = require("./service/sellservice");
 var searchImageService = require("./service/serchimageservice");
-
+var searchProductService = require("./service/searchproductservice");
 
 var searchImage = function (obj) {
     console.log("begin sellrecognizer controller searchImage " + obj);
@@ -510,6 +510,29 @@ var getItemInsideStore = function (storeId, position) {
     });
     return deferred.promise;
 }
+var getProductsOnWeb = function (obj) {
+
+    console.log("begin sellrecognizer controller getProductsOnWeb key " + obj );
+    var deferred = q.defer();
+
+    searchProductService.searchProduct(obj).then(function(items){
+        var res = {
+            Data: items,
+            Message: "",
+            Status: 1
+        };
+        deferred.resolve(res);
+    }).catch((ex) => {
+        var res = {
+            Data: ex,
+            Message: ex.Message,
+            Status: 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+
 
 module.exports =
     {
@@ -542,4 +565,5 @@ module.exports =
         getItemInsideStore: getItemInsideStore,
         saveItems: saveItems,
         getStoreContainItem: getStoreContainItem,
+        getProductsOnWeb: getProductsOnWeb,
     }
