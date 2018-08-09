@@ -120,6 +120,41 @@ function getImageLink(item){
     }
     return link;
 }
+function getReviews(item){
+    var reviews = [];
+    try{
+        var rvs = item.pagemap.review || [];
+        for(var i = 0; i < rvs.length; i++){
+            try{
+                if (rvs[i].description !== undefined && rvs[i].description !== ""){
+                    
+                    reviews.push(
+                        {
+                            id: uuid.v4(),
+                            description : rvs[i].description
+                        }                        
+                    );
+                }
+            } catch(e){}
+        }
+    } catch(e){}
+    try{
+        var brvs = item.pagemap.hreview || [];
+        for(var i = 0; i < brvs.length; i++){
+            try{
+                if (brvs[i].description !== undefined && brvs[i].description !== ""){
+                    reviews.push(
+                        {
+                            id: uuid.v4(),
+                            description : brvs[i].description
+                        }                           
+                    );
+                }
+            } catch(e){}
+        }
+    } catch(e){}
+    return reviews;
+}
 var searchProduct = function(obj){
 	console.log("searchproductservice searchProduct " + obj);
 	var deferred = q.defer();	
@@ -141,7 +176,7 @@ var searchProduct = function(obj){
                     title: item.title, 
                     index: index, 
                     id: uuid.v4(),
-                    reviews: (item.pagemap.review || []).length,                    
+                    reviews: getReviews(item),                    
                     currency : getCurrency(item),
                     price: getPrice(item),                    
                     rate: getRating(item)

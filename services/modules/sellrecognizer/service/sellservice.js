@@ -237,7 +237,7 @@ var getProductsByBluetoothCodes = function (devices) {
             var dvs = _.filter(devices, function (de, di) { return de.id == e.bluetoothCode });
             var device = undefined;
             if (dvs.length == 0) {
-                return; false;
+                return; 
             }
             device = dvs[0];
             e.bluetooth = device;

@@ -21,6 +21,25 @@ function openConnect() {
     });
     return deferred.promise;
 }
+function isLink(str){
+    var isL = false;
+    if(str.startsWith("http")) {
+        isL = true;
+    }
+    return isL;
+}
+function getProductNameFromQRCode(qrCode){
+    if(isLink(qrCode)) {
+        var ss = qrCode.split( '/' );
+        var str = "";
+        for(var i = 3; i < ss.length; i++){
+            str += " " + ss[i]; 
+        }
+        str = str.trim().replace('.',' ').replace('html','').replace(/-/g, ' ');
+        return str;
+    }
+    return qrCode;
+}
 var closeDataBase = function (database) {
     setTimeout(function () {
         database.close(true);
@@ -57,6 +76,7 @@ var getBy = function (collectionName, query, pageNum, pageSize) {
     size = size < 1 ? size = 10000 : size = size;
 
     openConnect().then(function (database) {
+        
         // Insert some users
         var collection = database.db(dbConfig.dbname).collection(collectionName);
         if (num == 1 && size == 1) {
@@ -70,7 +90,10 @@ var getBy = function (collectionName, query, pageNum, pageSize) {
                 //Close connection
                 database.close(true);
 
-            });
+            }).catch(function(ex){
+                deferred.reject(ex);
+            })
+            ;
         }
         else {
             collection.find(query)
@@ -243,22 +266,32 @@ var getByItemId = function (id) {
     });
 };
 var getItemByQRCode = function (qrCode) {
-    console.log("mongodb getItemByQRCode " + qrCode);
-    var query = {
-        $and: [
-            {
-                $or: [
-                    { code: qrCode },
-                    { sellCode: qrCode },
-                    { buyerCode: qrCode },
-                    { "section.code": qrCode }
-                ]
-            },
-            //{ $where: 'this.sellCode.length > 0' }
-            { $where: 'this.code.length > 0' }
-        ]
-
-    };
+    console.log("mongodb getItemByQRCode " + qrCode);    
+    var query = {};
+    if (isLink(qrCode)){
+        var str = getProductNameFromQRCode(qrCode);    
+        query = {
+            $text:{
+                $search: str
+            }
+        };
+    }
+    else {
+        query = {
+            $and: [
+                {
+                    $or: [
+                        { code: qrCode },
+                        { sellCode: qrCode },
+                        { buyerCode: qrCode },
+                        { "section.code": qrCode }
+                    ]
+                },
+                //{ $where: 'this.sellCode.length > 0' }
+                { $where: 'this.code.length > 0' }
+            ]
+        };
+    }
     return getItemsBy(query, 1, 1);
 };
 
