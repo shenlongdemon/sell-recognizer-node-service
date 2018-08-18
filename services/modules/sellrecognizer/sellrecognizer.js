@@ -541,7 +541,6 @@ module.exports =
         getItemById: getItemById,
         getItemsByOwnerId: getItemsByOwnerId,
         getItems: getItems,
-
         getItemBySellSectionId: getItemBySellSectionId,
         getCategories: getCategories,
         payment: payment,

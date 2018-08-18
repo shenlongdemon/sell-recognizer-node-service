@@ -7,7 +7,7 @@ var q = require('q');
 var test = require("./modules/test/test");
 var sellrecognizer = require("./modules/sellrecognizer/sellrecognizer");
 var ubuilder = require("./modules/ubuilder/ubuilder");
-
+var manifactory = require("./modules/manifactory/manifactory");
 var _ = require('underscore');
 module.exports =
 {
