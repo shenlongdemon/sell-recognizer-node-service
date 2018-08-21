@@ -112,6 +112,30 @@ var assignWorkerToTask = function (materialId, taskId, worker){
     
     return update(dbConfig.collections.materials, q, set);
 }
+var saveActivity = function(materialId, taskId, workerId, activity){
+
+    let collection = dbConfig.collections.materials;
+    var mq = {
+        id: materialId
+    };
+    return findOne(collection, mq).then(function(mat){
+        var task = _.find(mat.tasks,function(task){return task.id == taskId});
+        var taskIndex = _.findIndex(mat.tasks,function(t){ return t.id == taskId});
+        var workerIndex = _.findIndex(task.workers,function(w){ return w.owner.id == workerId});
+
+        var q = {
+            id: materialId,
+            "tasks.id":taskId,
+            "tasks.workers.owner.id":workerId,
+        };
+        let path = "tasks." + taskIndex + ".workers." + workerIndex + ".activities";
+
+        var s = '{ "$push": { "' + path + '" :  ' + JSON.stringify(activity) + '}}';
+        var set = JSON.parse(s);
+        return update(collection, q, set);
+    });
+    
+}
 module.exports =
     {
         login: login,
@@ -119,4 +143,5 @@ module.exports =
         getMaterialById:getMaterialById,
         getUserById: getUserById,
         assignWorkerToTask: assignWorkerToTask,
+        saveActivity: saveActivity,
     }

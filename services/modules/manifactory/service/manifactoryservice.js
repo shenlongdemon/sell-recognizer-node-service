@@ -15,6 +15,7 @@ function createWorkerInTask(){
         time : comm.dateLong()
     };
 }
+
 var login = function (phone, password) {
     return repo.login(phone, password);
 }
@@ -24,6 +25,11 @@ var getMaterialsByOwnerId = function (id, pageSize, pageNum) {
 var getMaterialById = function (id) {
     return repo.getMaterialById(id);
 }
+var getUserById = function (id) {
+    return repo.getUserById(id);
+}
+
+
 var assignWorkerToTask = function (materialId, taskId, workerId){
     return repo.getUserById(workerId).then(function(user){
         var worker = createWorkerInTask();
@@ -33,10 +39,24 @@ var assignWorkerToTask = function (materialId, taskId, workerId){
         });
     });
 }
+var saveActivity = function(materialId, taskId, workerId, title, description, imageNames){
+    let activity = {
+        id : uuid.v4(),
+        title: title,
+        description: description,
+        images: imageNames,
+        time: comm.dateLong()
+    }
+    return repo.saveActivity(materialId, taskId, workerId, activity).then(function(done){
+        return done;
+    });
+}
 module.exports =
 {
     login: login,
     getMaterialsByOwnerId: getMaterialsByOwnerId,
     getMaterialById: getMaterialById,
     assignWorkerToTask: assignWorkerToTask,
+    saveActivity: saveActivity,
+    getUserById: getUserById,
 }

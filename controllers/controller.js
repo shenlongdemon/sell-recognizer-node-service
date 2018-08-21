@@ -5,6 +5,29 @@
 var services = require("./../services/service");
 var version = "Add version when return data" + "" ;
 var _ = require('underscore');
+var upload = require('./config/multer.config.js');
+
+
+var doupload = function(req, res){
+	res.setHeader('Access-Control-Allow-Origin', '*');
+	
+	var service = req.params.service.toLowerCase();
+	var action = req.params.action;
+
+	var queries = Object.getOwnPropertyNames(req.query);
+	var values = [];
+	_.each(queries, function(query){
+		var value = req.query[query];
+		values.push(value);
+	});
+    upload(req, res, function (err) {
+        if (err) {
+            return res.end("Something went wrong!");
+        }
+        return res.end("File uploaded sucessfully!.");
+    });
+};
+
 var doget = function(req, res){
 	res.setHeader('Access-Control-Allow-Origin', '*');
 	
@@ -52,5 +75,6 @@ var dopost = function(req, res){
 module.exports =
 {	
     doget: doget,   
-	dopost : dopost
+    dopost : dopost,
+    doupload : doupload
 }

@@ -2,12 +2,13 @@ const http         = require('http'),
 fs           = require('fs'),
 path         = require('path'),
 compression  = require('compression'),
-express 	   = require("express"),
+express 	 = require("express"),
 bodyParser   = require("body-parser"),      
 env          = process.env,
 controller   = require("./controllers/controller"),
 mongodb      = require("./services/modules/sellrecognizer/repo/mongodb"),
-schedule     = require("./schedule/schedule")
+schedule     = require("./schedule/schedule"),
+stringify   = require('json-stringify-safe')
 ;
 global.OMID_CODE = "";
 
@@ -29,8 +30,10 @@ app.get("/", function (req, res){
 	res.sendFile("/index.html");
 });
 
+app.post("/api/upload/:service/:action", controller.doupload);
 app.get("/api/:service/:action", controller.doget);
 app.post("/api/:service/:action", controller.dopost);
+
 
 
 app.listen(app.get('port'), function() {

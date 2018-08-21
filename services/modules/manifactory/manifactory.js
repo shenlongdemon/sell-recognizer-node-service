@@ -31,9 +31,34 @@ var getMaterialById = function (id) {
     });
     return deferred.promise;
 }
+var getUserById = function (id) {
+    var deferred = q.defer();
+    service.getUserById(id).then(function (data) {
+        var res = {
+            Data: data,
+            Message: data != null ? "" : "Invalid phone or password",
+            Status: data != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+
 var assignWorkerToTask = function (data) {
     var deferred = q.defer();
     service.assignWorkerToTask(data.materialId, data.taskId, data.workerId).then(function (data) {
+        var res = {
+            Data: data,
+            Message: data != null ? "" : "Invalid phone or password",
+            Status: data != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+var saveActivity = function (data) {
+    var deferred = q.defer();
+    service.saveActivity(data.materialId, data.taskId, data.workerId, data.title, data.description, data.imageNames).then(function (data) {
         var res = {
             Data: data,
             Message: data != null ? "" : "Invalid phone or password",
@@ -68,4 +93,6 @@ module.exports =
         getMaterialsByOwnerId: getMaterialsByOwnerId,
         getMaterialById: getMaterialById,
         assignWorkerToTask:assignWorkerToTask,
+        saveActivity: saveActivity,
+        getUserById: getUserById,
     }
