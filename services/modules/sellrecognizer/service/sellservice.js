@@ -171,8 +171,7 @@ var insertItem = function (item) {
     item.code = itemCode + ownerCode;
     item.owner.code = ownerCode;
     item.section = { active: true, code: "", history: [] };
-    item.section.history.push(item.owner);
-
+    item.section.history.push(item.owner);    
     item.sellCode = item.code + sellWwnerCode;
     item.section.code = item.code + sellWwnerCode + global.OMID_CODE;
 

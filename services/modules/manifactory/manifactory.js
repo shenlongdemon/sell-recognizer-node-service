@@ -31,6 +31,31 @@ var getMaterialById = function (id) {
     });
     return deferred.promise;
 }
+var createMaterial = function(mat){
+    var deferred = q.defer();
+    service.createMaterial(mat).then(function (data) {
+        var res = {
+            Data: data,
+            Message: data != null ? "" : "Invalid phone or password",
+            Status: data != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+var createTask = function(task){
+    var deferred = q.defer();
+    service.createTask(task).then(function (data) {
+        var res = {
+            Data: data,
+            Message: data != null ? "" : "Invalid phone or password",
+            Status: data != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+
 var getUserById = function (id) {
     var deferred = q.defer();
     service.getUserById(id).then(function (data) {
@@ -43,10 +68,22 @@ var getUserById = function (id) {
     });
     return deferred.promise;
 }
-
-var assignWorkerToTask = function (data) {
+var getMaterialByQRCode = function (req) {
     var deferred = q.defer();
-    service.assignWorkerToTask(data.materialId, data.taskId, data.workerId).then(function (data) {
+    service.getMaterialByQRCode(req.qrcode).then(function (data) {
+        var res = {
+            Data: data,
+            Message: data != null ? "" : "Invalid phone or password",
+            Status: data != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+
+var assignWorkerToTask = function (req) {
+    var deferred = q.defer();
+    service.assignWorkerToTask(req.materialId, req.taskId, req.workerId).then(function (data) {
         var res = {
             Data: data,
             Message: data != null ? "" : "Invalid phone or password",
@@ -58,7 +95,7 @@ var assignWorkerToTask = function (data) {
 }
 var saveActivity = function (data) {
     var deferred = q.defer();
-    service.saveActivity(data.materialId, data.taskId, data.workerId, data.title, data.description, data.imageNames).then(function (data) {
+    service.saveActivity(data.materialId, data.taskId, data.workerId, data.title, data.description, data.imageNames, data.fileNames, data.userInfo).then(function (data) {
         var res = {
             Data: data,
             Message: data != null ? "" : "Invalid phone or password",
@@ -87,6 +124,18 @@ var login = function (data) {
     });
     return deferred.promise;
 }
+var getMaterialsByBluetooths = function (req) {
+    var deferred = q.defer();
+    service.getMaterialsByBluetooths(req.bluetooths, req.coord, req.myId).then(function (data) {
+        var res = {
+            Data: data,
+            Message: data != null ? "" : "Invalid phone or password",
+            Status: data != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
 module.exports =
     {
         login: login,
@@ -95,4 +144,8 @@ module.exports =
         assignWorkerToTask:assignWorkerToTask,
         saveActivity: saveActivity,
         getUserById: getUserById,
+        getMaterialByQRCode:getMaterialByQRCode,
+        createMaterial: createMaterial,
+        createTask: createTask,
+        getMaterialsByBluetooths:getMaterialsByBluetooths,
     }

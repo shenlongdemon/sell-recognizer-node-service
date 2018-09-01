@@ -59,6 +59,22 @@ function findOne(collectionName, query){
     });
     return deferred.promise;
 }
+function insert(collectionName, document){
+    var deferred = q.defer();
+    openConnect().then(function (database) {
+        var collection = database.db(dbConfig.dbname).collection(collectionName);
+        collection.insert(document).then(function (item, err) {
+            if (err) {
+                console.log("repo login error when login " + err);
+                deferred.reject(err);
+            } else {
+                deferred.resolve(document);
+            }
+            closeDataBase(database);
+        });
+    });
+    return deferred.promise;
+}
 function update(collectionName, query, set){
     var deferred = q.defer();
     openConnect().then(function (database) {
@@ -98,6 +114,21 @@ var getUserById = function (id) {
     var q = {id:id };
     return findOne(dbConfig.collections.users, q);
 };
+var createMaterial = function(material){
+    return insert(dbConfig.collections.materials, material);
+}
+var createTask = function(materialId, task){
+    var q = {
+        id: materialId
+    };
+    var set = { 
+        "$push": {
+            "tasks":  task
+        }
+    };
+    return update(dbConfig.collections.materials, q, set);
+}
+
 var assignWorkerToTask = function (materialId, taskId, worker){
     var q = {
         id: materialId,
@@ -108,9 +139,16 @@ var assignWorkerToTask = function (materialId, taskId, worker){
             "tasks.$.workers":  worker
         }
     };
-        
-    
     return update(dbConfig.collections.materials, q, set);
+}
+var getMaterialByQRCode = function(qrcode){
+    var query = {        
+        $or: [
+            { code: qrcode },            
+            { "tasks.code": qrcode }
+        ]        
+    };
+    return findOne(dbConfig.collections.materials, query);
 }
 var saveActivity = function(materialId, taskId, workerId, activity){
 
@@ -126,7 +164,7 @@ var saveActivity = function(materialId, taskId, workerId, activity){
         var q = {
             id: materialId,
             "tasks.id":taskId,
-            "tasks.workers.owner.id":workerId,
+            "tasks.workers.owner.id" : workerId,
         };
         let path = "tasks." + taskIndex + ".workers." + workerIndex + ".activities";
 
@@ -136,6 +174,23 @@ var saveActivity = function(materialId, taskId, workerId, activity){
     });
     
 }
+var getMaterialsByBluetoothIds = function(bluetoothIds, myId){
+    var q = { 
+        $and : [
+            {   bluetooth: { "$in": bluetoothIds } },
+            {
+                $or : [
+                    {   ownerId : myId  },
+                    {
+                        "tasks.workers.owner.id" : myId,
+                    }
+                ]
+            }
+        ]
+        
+    };
+    return findMany(dbConfig.collections.materials, q, 1000, 1);
+}
 module.exports =
     {
         login: login,
@@ -144,4 +199,8 @@ module.exports =
         getUserById: getUserById,
         assignWorkerToTask: assignWorkerToTask,
         saveActivity: saveActivity,
+        getMaterialByQRCode:getMaterialByQRCode,
+        createMaterial: createMaterial,
+        createTask:createTask,
+        getMaterialsByBluetoothIds:getMaterialsByBluetoothIds,
     }
