@@ -136,6 +136,55 @@ var getMaterialsByBluetooths = function (req) {
     });
     return deferred.promise;
 }
+var getTaskById = function (materialId, taskId) {
+    var deferred = q.defer();
+    service.getTaskById(materialId, taskId).then(function (data) {
+        var res = {
+            Data: data,
+            Message: data != null ? "" : "Invalid phone or password",
+            Status: data != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+var finishTask = function (data) {
+    var deferred = q.defer();
+    service.finishTask(data.materialId, data.taskId, data.taskName, data.userInfo).then(function (data) {
+        var res = {
+            Data: data,
+            Message: data != null ? "" : "Invalid phone or password",
+            Status: data != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+
+var getItemsByBeaconUUIDs  = function (data) {
+    var deferred = q.defer();
+    service.getItemsByBeaconUUIDs(data.beaconUUIDs).then(function (data) {
+        var res = {
+            Data: data,
+            Message: data != null ? "" : "Invalid phone or password",
+            Status: data != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+var uploadBeaconLocation  = function (data) {
+    var deferred = q.defer();
+    service.uploadBeaconLocation(data).then(function (data) {
+        var res = {
+            Data: data,
+            Message: data != null ? "" : "Invalid phone or password",
+            Status: data != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
 module.exports =
     {
         login: login,
@@ -148,4 +197,8 @@ module.exports =
         createMaterial: createMaterial,
         createTask: createTask,
         getMaterialsByBluetooths:getMaterialsByBluetooths,
+        getTaskById:getTaskById,
+        finishTask:finishTask,
+        getItemsByBeaconUUIDs: getItemsByBeaconUUIDs,
+        uploadBeaconLocation: uploadBeaconLocation,
     }

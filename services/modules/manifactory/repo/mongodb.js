@@ -15,7 +15,7 @@ function openConnect() {
             deferred.reject(err);
         } else {
             //HURRAY!! We are connected. :)
-            console.log('repo openConnect Connection established to', url);
+            // console.log('repo openConnect Connection established to', url);
             deferred.resolve(database);
         }
     });
@@ -80,6 +80,22 @@ function update(collectionName, query, set){
     openConnect().then(function (database) {
         var collection = database.db(dbConfig.dbname).collection(collectionName);
         collection.update(query, set).then(function (item, err) {
+            if (err) {
+                console.log("repo login error when login " + err);
+                deferred.reject(err);
+            } else {
+                deferred.resolve(item);
+            }
+            closeDataBase(database);
+        });
+    });
+    return deferred.promise;
+}
+function updateWithOption(collectionName, query, set, option){
+    var deferred = q.defer();
+    openConnect().then(function (database) {
+        var collection = database.db(dbConfig.dbname).collection(collectionName);
+        collection.update(query, set, option).then(function (item, err) {
             if (err) {
                 console.log("repo login error when login " + err);
                 deferred.reject(err);
@@ -166,10 +182,17 @@ var saveActivity = function(materialId, taskId, workerId, activity){
             "tasks.id":taskId,
             "tasks.workers.owner.id" : workerId,
         };
-        let path = "tasks." + taskIndex + ".workers." + workerIndex + ".activities";
 
+        // update status of worker = 1 --> starting
+        let pathStatus = "tasks." + taskIndex + ".workers." + workerIndex + ".status";
+        var sStatus = '{ "$set": { "' + pathStatus + '" :  ' + 1 + '}}';
+        var setStatus = JSON.parse(sStatus);
+        update(collection, q, setStatus);
+
+        let path = "tasks." + taskIndex + ".workers." + workerIndex + ".activities";
         var s = '{ "$push": { "' + path + '" :  ' + JSON.stringify(activity) + '}}';
-        var set = JSON.parse(s);
+        var set = JSON.parse(s);        
+
         return update(collection, q, set);
     });
     
@@ -191,6 +214,96 @@ var getMaterialsByBluetoothIds = function(bluetoothIds, myId){
     };
     return findMany(dbConfig.collections.materials, q, 1000, 1);
 }
+var getTaskById = function(materialId, taskId){
+    var query = {        
+        id:  materialId,
+        "tasks.id" : taskId,
+        tasks: {
+            $elemMatch : {
+                id : taskId
+            }
+        }
+    };
+    return findOne(dbConfig.collections.materials, query).then(function(material){
+        var task = _.find(material.tasks,function(task){return task.id == taskId});       
+        return task;
+    });;
+}
+var finishTask = function(materialId, taskId){
+    var query = {        
+        id:  materialId,
+        "tasks.id" : taskId        
+    };
+    var set = { 
+        "$set": {
+            "tasks.$.workers.$[].status": 2            
+        }
+    };
+    return update(dbConfig.collections.materials, query, set);
+}
+
+
+var updateMaterialCode = function(materialId, code){
+    var q = {
+        id: materialId
+    };
+    var set = { 
+        "$set": {
+            "code":  code
+        }
+    };
+    return update(dbConfig.collections.materials, q, set);
+}
+
+var getItemsByBeaconUUIDs = function(beaconUUIDs){
+    var q = {
+        $or: [
+            { bluetoothCode : { "$in": beaconUUIDs }},
+            { "iBeacon.proximityUUID" : { "$in": beaconUUIDs }},
+            { "iBeacon.id" : { "$in": beaconUUIDs }},
+        ]
+    };            
+    return findMany(dbConfig.collections.items, q);
+}
+
+var uploadBeaconLocation = function(itemId, proximityId, position, distance, userId, time) {
+    var q = {        
+        $and: [
+            {id: itemId },
+            {"beaconLocations.id": proximityId},
+            {"beaconLocations.userId": userId},
+        ]
+        
+    };
+    var set = {$set:{
+        "beaconLocations.$.position": position,
+        "beaconLocations.$.distance": distance,
+        "beaconLocations.$.time": time
+    }};
+    var option = {
+        upsert: true
+    };
+    return update(dbConfig.collections.items, q, set);
+}
+var getItemsByIds = function(ids){
+    var q = { id: { "$in": ids } };
+    return findMany(dbConfig.collections.items, q, 1000, 1);
+}
+var updateBeaconCurrentPosition = function(itemId, coord){
+    var q = {
+        id: itemId
+    };
+    var set = {$set:{
+        "iBeacon.coord": coord
+    }};
+    return update(dbConfig.collections.items, q, set);
+}
+var getItemById = function(itemId){
+    var q = {
+        id: itemId
+    };    
+    return findOne(dbConfig.collections.items, q);
+}
 module.exports =
     {
         login: login,
@@ -203,4 +316,12 @@ module.exports =
         createMaterial: createMaterial,
         createTask:createTask,
         getMaterialsByBluetoothIds:getMaterialsByBluetoothIds,
+        getTaskById: getTaskById,
+        finishTask: finishTask,
+        updateMaterialCode:updateMaterialCode,
+        getItemsByBeaconUUIDs:getItemsByBeaconUUIDs,
+        uploadBeaconLocation:uploadBeaconLocation,
+        getItemsByIds:getItemsByIds,
+        updateBeaconCurrentPosition:updateBeaconCurrentPosition,
+        getItemById:getItemById,
     }

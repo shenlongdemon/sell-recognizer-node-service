@@ -41,7 +41,7 @@ var doget = function(req, res){
 		values.push(value);
 	});
 
-	console.log("controller call doget " + service + "/" + action);			
+	// console.log("controller call doget " + service + "/" + action);			
 	services["doaction"](service, action, ...values).then(function (data) {					
 		res.status(200).send(data);
 	}).catch(function (error) {
@@ -60,7 +60,7 @@ var dopost = function(req, res){
 	var action = req.params.action;
 	var obj = req.body;		
 
-	console.log("controller call dopost " + service + "/" + action);	
+	// console.log("controller call dopost " + service + "/" + action);	
 	services["doaction"](service, action, obj).then(function (data) {		    		
 		res.status(200).send(data);
 	}).catch(function (error) {

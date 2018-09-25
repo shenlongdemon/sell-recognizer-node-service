@@ -4,6 +4,7 @@ var uuid = require("uuid");
 let STRS = ["0123456789", "abcdefghij", "klmnopqrs", "tuvwxyz", "ABCDEFGHIJ", "KLMNOPQRS", "TUVWXYZ", "-/ _+'.,;:", "[]{}"];
 var _ = require('underscore');
 var comm = require("../../common/common");
+var map = require("../../common/map");
 var LZString = require('lz-string');
 var MAX_DIGIT = 8;
 
@@ -50,6 +51,57 @@ function createUserInfoCode(action, userInfo){
     var str = genUserInfoCode(action, userInfo);
     return str;
 }
+function isTasKDone(task){
+    if (task.workers.length == 0){
+        return false;
+    }
+    var doneWorkers = _.filter(task.workers, function (worker) {
+        return worker.status == 2; // -1 means not present
+    });
+    return doneWorkers.length == task.workers.length;
+}
+
+function calculatePositionAndUpdate(item){   
+    var coord = {
+        latitude : 0.0,
+        longitude : 0.0,
+        altitude : 0.0,
+        distance : 0.0
+    };
+    // First sort ASC 
+    var ascending = _.sortBy(item.beaconLocations, 'time'); 
+    // Then get DESC 
+    var beaconLocations = ascending.reverse().slice(0, 2);
+    if (beaconLocations.length > 0){
+        if (beaconLocations.length == 1){
+            // if beaconLocations has 1 item then use it as new location
+            var  beaconLocation = beaconLocations[0];
+            coord.latitude = beaconLocation.position.latitude;
+            coord.longitude = beaconLocation.position.longitude;
+            coord.altitude = beaconLocation.position.altitude;
+            coord.distance = beaconLocation.distance;
+        }
+        else if (beaconLocations.length >= 2){
+            var circles = [];
+            for(var i = 0 ; i < beaconLocations.length; i++){
+                var beaconLocation = beaconLocations[i];
+                var circle = {
+                    latitude : beaconLocation.position.latitude,
+                    longitude : beaconLocation.position.longitude,
+                    radius: beaconLocation.distance
+                };
+                circles.push(circle);
+            }
+
+            coord = map.getCenterOfCircles(circles);
+            coord.altitude = 0.0;
+            coord.distance = 0.0;
+            
+        }
+        repo.updateBeaconCurrentPosition(item.id, coord);
+    }
+}
+
 var login = function (phone, password) {
     return repo.login(phone, password);
 }
@@ -86,7 +138,8 @@ var createTask = function (task) {
         description :   task.description,
         image :         task.image,
         code :          code,        
-        workers:        []
+        workers:        [],
+        status:         0
     };    
     return repo.createTask(task.materialId, newTask).then(function(done){
         return task;
@@ -111,9 +164,9 @@ var saveActivity = function(materialId, taskId, workerId, title, description, im
         images: imageNames,
         files: fileNames,
         time: comm.dateLong(),
-        cood: userInfo.position.coord,
+        coord: userInfo.position.coord,
         code: code
-    }
+    }    
     return repo.saveActivity(materialId, taskId, workerId, activity).then(function(done){
         return done;
     });
@@ -124,6 +177,47 @@ var getMaterialByQRCode = function(qrcode){
 var getMaterialsByBluetooths = function(bluetooths, coord, myId) {
     var bluetoothIds = bluetooths.map(p => p.id);
     return repo.getMaterialsByBluetoothIds(bluetoothIds, myId);
+}
+var getTaskById = function(materialId, taskId) {    
+    return repo.getTaskById(materialId, taskId);
+}
+var finishTask = function(materialId, taskId, taskName, userInfo) {    
+    return repo.finishTask(materialId, taskId).then(function(done) {
+        var code = createUserInfoCode("DONETASK " + taskName, userInfo);
+        return repo.updateMaterialCode(materialId, code).then(function(edited) {
+            return done;
+        });
+    });
+}
+var getItemsByBeaconUUIDs = function(beaconUUIDs) {    
+    return repo.getItemsByBeaconUUIDs(beaconUUIDs);
+}
+var uploadBeaconLocation = function(data) {        
+    if (global.itemIdsToUpdateBeaconLocation.indexOf(data.itemId) !== -1){
+        global.itemIdsToUpdateBeaconLocation =  global.itemIdsToUpdateBeaconLocation.filter(function(e) { return e !== data.itemId });
+    }   
+    global.itemIdsToUpdateBeaconLocation.splice(0, 0, data.itemId);
+
+    var time = comm.dateLong();
+    repo.uploadBeaconLocation(data.itemId, data.proximityId, data.position, data.distance, data.userId, time);
+    return repo.getItemById(data.itemId);
+}
+var updateAllBeaconLcationEachMinute = function(count){    
+    var time = 3;
+    console.log("updateAllBeaconLcationEachMinute " + count);
+    if (count > 58){
+        return
+    }
+    setTimeout(function() {        
+        var top10Items = global.itemIdsToUpdateBeaconLocation.slice(0, 10);
+        repo.getItemsByIds(top10Items).then(function(items){            
+            for(var i = 0; i< items.length; i++){
+                var item = items[i];
+                calculatePositionAndUpdate(item);
+            }
+        });        
+        updateAllBeaconLcationEachMinute(count + time);
+    }, 1000 * time);
 }
 module.exports =
 {
@@ -137,4 +231,34 @@ module.exports =
     createMaterial:createMaterial,
     createTask:createTask,
     getMaterialsByBluetooths:getMaterialsByBluetooths,
+    getTaskById: getTaskById,
+    finishTask: finishTask,
+    getItemsByBeaconUUIDs:getItemsByBeaconUUIDs,
+    uploadBeaconLocation:uploadBeaconLocation,
+    updateAllBeaconLcationEachMinute:updateAllBeaconLcationEachMinute,
 }
+
+/**
+ * .then(function(material){
+
+        var tasks = material.tasks;
+        if (tasks.length > 0 ){
+            var lastTaskFinishded = -1;
+            for(var i = 0; i < tasks.length; i++){
+                var task = tasks[i];
+                if (isTasKDone(task)){
+                    lastTaskFinishded = i;
+                }
+            }
+            if (lastTaskFinishded > -1){
+                tasks.splice(lastTaskFinishded, 0, {
+                    id: material.code
+                });
+            }
+        }
+        return material;
+    })
+ * 
+ * 
+ * 
+ */

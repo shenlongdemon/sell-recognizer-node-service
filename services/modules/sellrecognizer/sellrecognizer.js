@@ -540,6 +540,7 @@ module.exports =
         insertItem: insertItem,
         getItemById: getItemById,
         getItemsByOwnerId: getItemsByOwnerId,
+        getItemByQRCode: getItemByQRCode,
         getItems: getItems,
         getItemBySellSectionId: getItemBySellSectionId,
         getCategories: getCategories,
@@ -547,7 +548,7 @@ module.exports =
         login: login,
         publishSell: publishSell,
         getSelledItems: getSelledItems,
-        getItemByQRCode: getItemByQRCode,
+        
         updateUser: updateUser,
         getItemsByCodes: getItemsByCodes,
         getProductsByCodes: getProductsByCodes,

@@ -165,9 +165,7 @@ var insertItem = function (item) {
     var itemCode = genItemCode(item);
     var ownerCode = genInfoCode("[Product]", item.owner)
     var sellWwnerCode = genInfoCode("[Sell]", item.owner)
-
-
-
+    item.beaconLocations = [];
     item.code = itemCode + ownerCode;
     item.owner.code = ownerCode;
     item.section = { active: true, code: "", history: [] };

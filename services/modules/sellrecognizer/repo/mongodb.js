@@ -15,7 +15,7 @@ function openConnect() {
             deferred.reject(err);
         } else {
             //HURRAY!! We are connected. :)
-            console.log('repo openConnect Connection established to', url);
+            // console.log('repo openConnect Connection established to', url);
             deferred.resolve(database);
         }
     });
