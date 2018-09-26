@@ -2,7 +2,7 @@
 var q = require('q');
 var _ = require('underscore');
 var uuid = require("uuid");
-
+var sellSerivice =  require("./sellservice");
 const {google} = require('googleapis');
 const urlshortener = google.urlshortener('v1');
 const customsearch = google.customsearch('v1');
@@ -161,7 +161,9 @@ var searchProduct = function(obj){
     var list = [];
 	var options = _.clone(searchOptions);
 	options.q = obj;
-    
+    var searchServiceCount = 0;
+    var SERVICES = 1;
+
 	customsearch.cse.list({
 		cx: options.cx,
 		q: options.q,
@@ -179,7 +181,9 @@ var searchProduct = function(obj){
                     reviews: getReviews(item),                    
                     currency : getCurrency(item),
                     price: getPrice(item),                    
-                    rate: getRating(item)
+                    rate: getRating(item),
+                    raw: item,
+                    type: 1 // search on web
                 };
 			});
 			
@@ -188,7 +192,10 @@ var searchProduct = function(obj){
                 items: items,
                 raw : json.data.items
             };
-			deferred.resolve(items);	
+            searchServiceCount += 1;
+            if(searchServiceCount == SERVICES){
+                deferred.resolve(items);	
+            }
 		});
     return deferred.promise;
 };

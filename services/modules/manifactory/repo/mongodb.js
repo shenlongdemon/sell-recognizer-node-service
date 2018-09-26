@@ -160,11 +160,25 @@ var assignWorkerToTask = function (materialId, taskId, worker){
 var getMaterialByQRCode = function(qrcode){
     var query = {        
         $or: [
+            { id: qrcode }, 
             { code: qrcode },            
-            { "tasks.code": qrcode }
+            { "tasks.code": qrcode },
+            { "tasks.id": qrcode }
         ]        
     };
     return findOne(dbConfig.collections.materials, query);
+}
+var getItemByQRCode = function(qrcode){
+    var query = {        
+        $or: [
+            { id: qrcode }, 
+            { code: qrcode },            
+            { "material.id": qrcode },
+            { "material.code": qrcode },
+            { "material.tasks.code": qrcode }            
+        ]        
+    };
+    return findOne(dbConfig.collections.items, query);
 }
 var saveActivity = function(materialId, taskId, workerId, activity){
 
@@ -289,6 +303,12 @@ var getItemsByIds = function(ids){
     var q = { id: { "$in": ids } };
     return findMany(dbConfig.collections.items, q, 1000, 1);
 }
+var getItemById = function(itemId){
+    var q = {
+        id: itemId
+    };
+    return findOne(dbConfig.collections.items, q);
+}
 var updateBeaconCurrentPosition = function(itemId, coord){
     var q = {
         id: itemId
@@ -322,6 +342,8 @@ module.exports =
         getItemsByBeaconUUIDs:getItemsByBeaconUUIDs,
         uploadBeaconLocation:uploadBeaconLocation,
         getItemsByIds:getItemsByIds,
+        getItemById:getItemById,
         updateBeaconCurrentPosition:updateBeaconCurrentPosition,
         getItemById:getItemById,
+        getItemByQRCode:getItemByQRCode,
     }

@@ -1,5 +1,6 @@
 var q = require('q');
 var sellrepo = require("../repo/mongodb");
+var manufacotryRepo = require("../../manifactory/repo/mongodb");
 var uuid = require("uuid");
 let STRS = ["0123456789", "abcdefghij", "klmnopqrs", "tuvwxyz", "ABCDEFGHIJ", "KLMNOPQRS", "TUVWXYZ", "-/ _+'.,;:", "[]{}"];
 var _ = require('underscore');
@@ -122,7 +123,8 @@ var updateUser = function (userId, usertoUpdate) {
     return sellrepo.updateUser(userId, usertoUpdate);
 };
 var getItemById = function (id) {
-    return sellrepo.getItemById(id);
+    //return sellrepo.getItemById(id);
+    return manufacotryRepo.getItemById(id);
 };
 var getItemsByOwnerId = function (ownerId, pageNum, pageSize) {
     return sellrepo.getItemsByOwnerId(ownerId, pageNum, pageSize);
@@ -172,10 +174,9 @@ var insertItem = function (item) {
     item.section.history.push(item.owner);    
     item.sellCode = item.code + sellWwnerCode;
     item.section.code = item.code + sellWwnerCode + global.OMID_CODE;
-
     item.buyerCode = "";
     item.buyer = undefined;
-
+    item.time = comm.dateLong();
     return sellrepo.insertItem(item);
 };
 var payment = function (itemId, buyerInfo) {

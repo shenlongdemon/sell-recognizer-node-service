@@ -73,6 +73,9 @@ function calculatePositionAndUpdate(item){
     // Then get DESC 
     var beaconLocations = ascending.reverse().slice(0, 2);
     if (beaconLocations.length > 0){
+        var lastTime = beaconLocations[0].time;
+        beaconLocations = beaconLocations.filter(p => lastTime - p.time < 10 );
+
         if (beaconLocations.length == 1){
             // if beaconLocations has 1 item then use it as new location
             var  beaconLocation = beaconLocations[0];
@@ -174,6 +177,46 @@ var saveActivity = function(materialId, taskId, workerId, title, description, im
 var getMaterialByQRCode = function(qrcode){
     return repo.getMaterialByQRCode(qrcode);
 }
+var getObjectByQRCode = function(qrcode){
+
+    // return Promise.Promise.all([
+    //     repo.getMaterialByQRCode(qrcode),
+    //     repo.getItemByQRCode(),
+    // ])
+    // .then(([material, item]) => {
+    //     if (material){
+    //         return {
+    //             type: 1,
+    //             item: material
+    //         };
+    //     }
+    //     if (item){
+    //         return {
+    //             type: 2,
+    //             item: item
+    //         };
+    //     }
+    // });
+    return repo.getMaterialByQRCode(qrcode).then(function(material){
+        if (material){
+            return {
+                type: 1,
+                item: material
+            };
+        }
+        else {
+            return repo.getItemByQRCode(qrcode).then(function(item){
+                if (item){
+                    return {
+                        type: 2,
+                        item: item
+                    };
+                }
+            });
+        }
+    });
+}
+
 var getMaterialsByBluetooths = function(bluetooths, coord, myId) {
     var bluetoothIds = bluetooths.map(p => p.id);
     return repo.getMaterialsByBluetoothIds(bluetoothIds, myId);
@@ -228,6 +271,7 @@ module.exports =
     saveActivity: saveActivity,
     getUserById: getUserById,
     getMaterialByQRCode:getMaterialByQRCode,
+    getObjectByQRCode:getObjectByQRCode,
     createMaterial:createMaterial,
     createTask:createTask,
     getMaterialsByBluetooths:getMaterialsByBluetooths,

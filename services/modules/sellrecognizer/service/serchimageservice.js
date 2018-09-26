@@ -36,8 +36,7 @@ var searchImage = function(obj){
 			console.log("sellrecognizer got searchImage");
 			var items = _.map(json.data.items, function(item, index){ 
 				return {link:item.link, title: item.title, index: index, id: uuid.v4()};
-			});
-			
+			});			
 			console.log("sellrecognizer searchImage res = " + JSON.stringify(items));
 			deferred.resolve(items);	
 		});

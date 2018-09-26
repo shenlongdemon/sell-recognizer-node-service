@@ -80,6 +80,18 @@ var getMaterialByQRCode = function (req) {
     });
     return deferred.promise;
 }
+var getObjectByQRCode = function (req) {
+    var deferred = q.defer();
+    service.getObjectByQRCode(req.qrcode).then(function (data) {
+        var res = {
+            Data: data,
+            Message: data != null ? "" : "Invalid phone or password",
+            Status: data != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
 
 var assignWorkerToTask = function (req) {
     var deferred = q.defer();
@@ -201,4 +213,5 @@ module.exports =
         finishTask:finishTask,
         getItemsByBeaconUUIDs: getItemsByBeaconUUIDs,
         uploadBeaconLocation: uploadBeaconLocation,
+        getObjectByQRCode:getObjectByQRCode,
     }
