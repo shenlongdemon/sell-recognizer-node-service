@@ -318,11 +318,14 @@ var updateBeaconCurrentPosition = function(itemId, coord){
     }};
     return update(dbConfig.collections.items, q, set);
 }
-var getItemById = function(itemId){
+var addMaintain = function(itemId, activity){
     var q = {
         id: itemId
-    };    
-    return findOne(dbConfig.collections.items, q);
+    };
+    var set = {$addToSet:{
+        "maintains": activity
+    }};
+    return update(dbConfig.collections.items, q, set);
 }
 module.exports =
     {
@@ -346,4 +349,5 @@ module.exports =
         updateBeaconCurrentPosition:updateBeaconCurrentPosition,
         getItemById:getItemById,
         getItemByQRCode:getItemByQRCode,
+        addMaintain: addMaintain,
     }

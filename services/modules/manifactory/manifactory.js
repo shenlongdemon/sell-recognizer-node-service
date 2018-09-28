@@ -107,7 +107,7 @@ var assignWorkerToTask = function (req) {
 }
 var saveActivity = function (data) {
     var deferred = q.defer();
-    service.saveActivity(data.materialId, data.taskId, data.workerId, data.title, data.description, data.imageNames, data.fileNames, data.userInfo).then(function (data) {
+    service.saveActivity(data.itemId, data.materialId, data.taskId, data.workerId, data.title, data.description, data.imageNames, data.fileNames, data.userInfo).then(function (data) {
         var res = {
             Data: data,
             Message: data != null ? "" : "Invalid phone or password",
@@ -197,6 +197,24 @@ var uploadBeaconLocation  = function (data) {
     });
     return deferred.promise;
 }
+var getItemById = function (id) {
+    console.log("begin manufactory controller getItemById " + id);
+    var deferred = q.defer();
+
+    service.getItemById(id)
+        .then(function (res) {
+            console.log("manufactory controller getItemById " + res);
+            var res = {
+                Data: res,
+                Message: "",
+                Status: 1
+            };
+            deferred.resolve(res);
+        }
+        );
+
+    return deferred.promise;
+};
 module.exports =
     {
         login: login,
@@ -214,4 +232,5 @@ module.exports =
         getItemsByBeaconUUIDs: getItemsByBeaconUUIDs,
         uploadBeaconLocation: uploadBeaconLocation,
         getObjectByQRCode:getObjectByQRCode,
+        getItemById:getItemById,
     }

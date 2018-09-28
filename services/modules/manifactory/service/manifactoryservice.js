@@ -71,11 +71,16 @@ function calculatePositionAndUpdate(item){
     // First sort ASC 
     var ascending = _.sortBy(item.beaconLocations, 'time'); 
     // Then get DESC 
-    var beaconLocations = ascending.reverse().slice(0, 2);
-    if (beaconLocations.length > 0){
-        var lastTime = beaconLocations[0].time;
-        beaconLocations = beaconLocations.filter(p => lastTime - p.time < 10 );
-
+    var beaconLocations = ascending.reverse().slice(0, 2);    
+    if (beaconLocations.length > 0){        
+        var current = comm.dateLong();
+        beaconLocations = beaconLocations.filter(p => current - p.time < 10000 );
+    }
+    if (beaconLocations.length == 0){  
+        global.itemIdsToUpdateBeaconLocation = global.itemIdsToUpdateBeaconLocation.filter(p => p !==  item.id);
+    }
+    else {        
+        console.log("calculatePositionAndUpdate " + item.name + " (global.itemIdsToUpdateBeaconLocation : " + global.itemIdsToUpdateBeaconLocation.length + " )");
         if (beaconLocations.length == 1){
             // if beaconLocations has 1 item then use it as new location
             var  beaconLocation = beaconLocations[0];
@@ -158,21 +163,31 @@ var assignWorkerToTask = function (materialId, taskId, workerId){
         });
     });
 }
-var saveActivity = function(materialId, taskId, workerId, title, description, imageNames, fileNames, userInfo){
+var saveActivity = function(itemId, materialId, taskId, workerId, title, description, imageNames, fileNames, userInfo){
     var code = createUserInfoCode("ACTIVITY " + title, userInfo);
-    let activity = {
-        id : uuid.v4(),
-        title: title,
-        description: description,
-        images: imageNames,
-        files: fileNames,
-        time: comm.dateLong(),
-        coord: userInfo.position.coord,
-        code: code
-    }    
-    return repo.saveActivity(materialId, taskId, workerId, activity).then(function(done){
-        return done;
-    });
+        let activity = {
+            id : uuid.v4(),
+            title: title,
+            description: description,
+            images: imageNames,
+            files: fileNames,
+            time: comm.dateLong(),
+            coord: userInfo.position.coord,
+            code: code
+        };
+    
+    if (itemId === ""){         
+        return repo.saveActivity(materialId, taskId, workerId, activity).then(function(done){
+            return done;
+        });
+    }
+    else {        
+        activity.worker = {
+            owner: userInfo
+        };
+
+        return repo.addMaintain(itemId, activity);
+    }
 }
 var getMaterialByQRCode = function(qrcode){
     return repo.getMaterialByQRCode(qrcode);
@@ -199,6 +214,7 @@ var getObjectByQRCode = function(qrcode){
     // });
     return repo.getMaterialByQRCode(qrcode).then(function(material){
         if (material){
+            console.log("getObjectByQRCode found 1 material");
             return {
                 type: 1,
                 item: material
@@ -207,10 +223,14 @@ var getObjectByQRCode = function(qrcode){
         else {
             return repo.getItemByQRCode(qrcode).then(function(item){
                 if (item){
+                    console.log("getObjectByQRCode found 1 item");
                     return {
                         type: 2,
                         item: item
                     };
+                }
+                else {
+                    console.log("getObjectByQRCode found no with qrcode " + qrcode);
                 }
             });
         }
@@ -235,6 +255,9 @@ var finishTask = function(materialId, taskId, taskName, userInfo) {
 var getItemsByBeaconUUIDs = function(beaconUUIDs) {    
     return repo.getItemsByBeaconUUIDs(beaconUUIDs);
 }
+var getItemById = function(itemId) {    
+    return repo.getItemById(itemId);
+}
 var uploadBeaconLocation = function(data) {        
     if (global.itemIdsToUpdateBeaconLocation.indexOf(data.itemId) !== -1){
         global.itemIdsToUpdateBeaconLocation =  global.itemIdsToUpdateBeaconLocation.filter(function(e) { return e !== data.itemId });
@@ -247,7 +270,7 @@ var uploadBeaconLocation = function(data) {
 }
 var updateAllBeaconLcationEachMinute = function(count){    
     var time = 3;
-    console.log("updateAllBeaconLcationEachMinute " + count);
+    // console.log("updateAllBeaconLcationEachMinute " + count);
     if (count > 58){
         return
     }
@@ -280,6 +303,7 @@ module.exports =
     getItemsByBeaconUUIDs:getItemsByBeaconUUIDs,
     uploadBeaconLocation:uploadBeaconLocation,
     updateAllBeaconLcationEachMinute:updateAllBeaconLcationEachMinute,
+    getItemById:getItemById,
 }
 
 /**
