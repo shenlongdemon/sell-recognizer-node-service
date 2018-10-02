@@ -191,8 +191,15 @@ var getStoreById = function (id) {
     return getBy(dbConfig.collections.stores, query, 1, 1);
 };
 var getItemsByOwnerId = function (ownerId, pageNum, pageSize) {
-    var query = { "owner.id": ownerId };
-    return getItemsBy(query, pageNum, pageSize);
+
+    var q = {
+        $or: [
+            { "owner.id" : ownerId },
+            { "buyer.id" : ownerId},
+        ]
+    };   
+    
+    return getItemsBy(q, pageNum, pageSize);
 };
 
 var getItems = function (pageNum, pageSize) {
