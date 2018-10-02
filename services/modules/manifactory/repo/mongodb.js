@@ -257,13 +257,14 @@ var finishTask = function(materialId, taskId){
 }
 
 
-var updateMaterialCode = function(materialId, code){
+var updateMaterialCode = function(materialId, code, updatedAt){
     var q = {
         id: materialId
     };
     var set = { 
         "$set": {
-            "code":  code
+            "code":  code,
+            "updatedAt": updatedAt
         }
     };
     return update(dbConfig.collections.materials, q, set);

@@ -247,7 +247,8 @@ var getTaskById = function(materialId, taskId) {
 var finishTask = function(materialId, taskId, taskName, userInfo) {    
     return repo.finishTask(materialId, taskId).then(function(done) {
         var code = createUserInfoCode("DONETASK " + taskName, userInfo);
-        return repo.updateMaterialCode(materialId, code).then(function(edited) {
+        var updatedAt = comm.dateLong();
+        return repo.updateMaterialCode(materialId, code, updatedAt).then(function(edited) {
             return done;
         });
     });
