@@ -172,7 +172,8 @@ var getItemByQRCode = function(qrcode){
     var query = {        
         $or: [
             { id: qrcode }, 
-            { code: qrcode },            
+            { code: qrcode },  
+            { "section.history.code": qrcode },      
             { "material.id": qrcode },
             { "material.code": qrcode },
             { "material.tasks.code": qrcode }            

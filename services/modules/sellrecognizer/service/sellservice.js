@@ -196,6 +196,7 @@ var confirmReceiveItem = function (itemId) {
     var deferred = q.defer();
     sellrepo.getItemById(itemId).then(function (item) {
         item.code = genItemCode(item) + genInfoCode("[Own]", item.buyer)
+        item.buyer.code = item.buyerCode;
         item.section.history.push(item.buyer);
         item.owner = item.buyer;
         item.buyer = undefined;

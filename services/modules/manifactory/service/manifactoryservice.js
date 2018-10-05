@@ -129,7 +129,7 @@ var createMaterial = function (mat) {
         ownerId :       mat.ownerId,
         name :          mat.name,
         description :   mat.description,
-        image :         mat.image,
+        imageUrl :      mat.imageUrl,
         code :          code,
         bluetooth :     mat.bluetooth,
         createdAt :     comm.dateLong(),
@@ -144,7 +144,7 @@ var createTask = function (task) {
         id :            uuid.v4(),        
         name :          task.name,
         description :   task.description,
-        image :         task.image,
+        imageUrl :      task.imageUrl,
         code :          code,        
         workers:        [],
         status:         0
@@ -182,9 +182,7 @@ var saveActivity = function(itemId, materialId, taskId, workerId, title, descrip
         });
     }
     else {        
-        activity.worker = {
-            owner: userInfo
-        };
+        activity.worker = userInfo;
 
         return repo.addMaintain(itemId, activity);
     }
