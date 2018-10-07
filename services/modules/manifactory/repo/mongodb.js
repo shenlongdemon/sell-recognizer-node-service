@@ -299,7 +299,7 @@ var uploadBeaconLocation = function(itemId, proximityId, position, distance, use
 
     var itemQ = {id: itemId };
     findOne(dbConfig.collections.items, itemQ).then(function(item){
-        var beaconLocationOfUser = _.find(item.beaconLocations,function(beaconLocation){return beaconLocation.userId == userId});
+        var beaconLocationOfUser = _.find(item.beaconLocations,function(beaconLocation){return beaconLocation.userId == userId && beaconLocation.id == proximityId});
         if (beaconLocationOfUser){
             var q = {        
                 $and: [
