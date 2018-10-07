@@ -74,7 +74,7 @@ function calculatePositionAndUpdate(item){
     var beaconLocations = ascending.reverse().slice(0, 2);    
     if (beaconLocations.length > 0){        
         var current = comm.dateLong();
-        beaconLocations = beaconLocations.filter(p => current - p.time < 10000 );
+        beaconLocations = beaconLocations.filter(p => current - p.time < 50000 );
     }
     if (beaconLocations.length == 0){  
         global.itemIdsToUpdateBeaconLocation = global.itemIdsToUpdateBeaconLocation.filter(p => p !==  item.id);

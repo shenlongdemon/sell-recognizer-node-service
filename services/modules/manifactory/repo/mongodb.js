@@ -103,6 +103,8 @@ function updateWithOption(collectionName, query, set, option){
                 deferred.resolve(item);
             }
             closeDataBase(database);
+        }).catch(function(e){
+            deferred.reject(e);
         });
     });
     return deferred.promise;
@@ -294,23 +296,48 @@ var getItemsByBeaconUUIDs = function(beaconUUIDs){
 }
 
 var uploadBeaconLocation = function(itemId, proximityId, position, distance, userId, time) {
-    var q = {        
-        $and: [
-            {id: itemId },
-            {"beaconLocations.id": proximityId},
-            {"beaconLocations.userId": userId},
-        ]
-        
-    };
-    var set = {$set:{
-        "beaconLocations.$.position": position,
-        "beaconLocations.$.distance": distance,
-        "beaconLocations.$.time": time
-    }};
-    var option = {
-        upsert: true
-    };
-    return update(dbConfig.collections.items, q, set);
+
+    var itemQ = {id: itemId };
+    findOne(dbConfig.collections.items, itemQ).then(function(item){
+        var beaconLocationOfUser = _.find(item.beaconLocations,function(beaconLocation){return beaconLocation.userId == userId});
+        if (beaconLocationOfUser){
+            var q = {        
+                $and: [
+                    {id: itemId },
+                    {"beaconLocations.id": proximityId},
+                    {"beaconLocations.userId": userId}
+                ]
+            };
+            var set = {$set:{
+                "beaconLocations.$.position": position,
+                "beaconLocations.$.distance": distance,
+                "beaconLocations.$.time": time
+            }};
+            var option = {
+                upsert: true
+            };
+            return updateWithOption(dbConfig.collections.items, q, set, option);
+        }
+        else {
+            var q = {
+                id: itemId
+            };
+            var beaconLocation = {
+                id : proximityId,
+                userId: userId,
+                position: position,
+                distance: distance,
+                time: time
+            };
+            var set = { 
+                "$push": {
+                    "beaconLocations":  beaconLocation
+                }
+            };
+            return update(dbConfig.collections.items, q, set);
+        }
+    });
+    
 }
 var getItemsByIds = function(ids){
     var q = { id: { "$in": ids } };
