@@ -229,6 +229,17 @@ var getMaterialsByBluetoothIds = function(bluetoothIds, myId){
     };
     return findMany(dbConfig.collections.materials, q, 1000, 1);
 }
+var getBeaconsByBluetoothIds = function(bluetoothIds){
+    var q = { 
+        $or : [
+            {   id: { "$in": bluetoothIds } },
+            {   bluetoothId: { "$in": bluetoothIds } },
+            {   beaconId: { "$in": bluetoothIds } }
+        ]
+        
+    };
+    return findMany(dbConfig.collections.beacons, q, 1000, 1);
+}
 var getTaskById = function(materialId, taskId){
     var query = {        
         id:  materialId,
@@ -352,4 +363,5 @@ module.exports =
         getItemById:getItemById,
         getItemByQRCode:getItemByQRCode,
         addMaintain: addMaintain,
+        getBeaconsByBluetoothIds:getBeaconsByBluetoothIds,
     }

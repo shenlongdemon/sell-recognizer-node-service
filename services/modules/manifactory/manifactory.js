@@ -148,6 +148,19 @@ var getMaterialsByBluetooths = function (req) {
     });
     return deferred.promise;
 }
+var getBeaconsByBluetoothIds = function (req) {
+    var deferred = q.defer();
+    service.getBeaconsByBluetoothIds(req.bluetoothIds).then(function (data) {
+        var res = {
+            Data: data,
+            Message: data != null ? "" : "Invalid phone or password",
+            Status: data != null ? 1 : 0
+        };
+        deferred.resolve(res);
+    });
+    return deferred.promise;
+}
+
 var getTaskById = function (materialId, taskId) {
     var deferred = q.defer();
     service.getTaskById(materialId, taskId).then(function (data) {
@@ -233,4 +246,5 @@ module.exports =
         uploadBeaconLocation: uploadBeaconLocation,
         getObjectByQRCode:getObjectByQRCode,
         getItemById:getItemById,
+        getBeaconsByBluetoothIds:getBeaconsByBluetoothIds,
     }

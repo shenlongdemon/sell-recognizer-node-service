@@ -10,7 +10,8 @@ var config = {
         projecttypes:"ProjectType",
         stores:'Stores',
         manifactory: 'Manifactory',
-        materials: 'Materials'
+        materials: 'Materials',
+        beacons: 'Beacons'
     }
 };
 module.exports = config;

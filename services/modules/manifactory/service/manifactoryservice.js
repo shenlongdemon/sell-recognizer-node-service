@@ -257,6 +257,9 @@ var getItemsByBeaconUUIDs = function(beaconUUIDs) {
 var getItemById = function(itemId) {    
     return repo.getItemById(itemId);
 }
+var getBeaconsByBluetoothIds = function(bluetoothIds){
+    return repo.getBeaconsByBluetoothIds(bluetoothIds);
+}
 var uploadBeaconLocation = function(data) {        
     if (global.itemIdsToUpdateBeaconLocation.indexOf(data.itemId) !== -1){
         global.itemIdsToUpdateBeaconLocation =  global.itemIdsToUpdateBeaconLocation.filter(function(e) { return e !== data.itemId });
@@ -303,6 +306,7 @@ module.exports =
     uploadBeaconLocation:uploadBeaconLocation,
     updateAllBeaconLcationEachMinute:updateAllBeaconLcationEachMinute,
     getItemById:getItemById,
+    getBeaconsByBluetoothIds: getBeaconsByBluetoothIds,
 }
 
 /**
